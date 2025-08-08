@@ -26,7 +26,8 @@ const EnrolledStudentsPanel = ({ enrolledStudents }) => {
                       {studentEmail}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Enrolled: {new Date(enrollment.createdAt).toLocaleDateString()}
+                      Enrolled:{" "}
+                      {new Date(enrollment.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs rounded-full whitespace-nowrap">

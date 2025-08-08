@@ -7,7 +7,6 @@ import { enrollmentService } from "../../../services/enrollmentService";
 import { sessionService } from "../../../services/sessionService";
 import { useAuth } from "../../../hooks/useAuth";
 import { showToast } from "../../../components/Toast";
-import { routes } from "../../../constants/routes";
 import CoursesSidebar from "./CoursesSidebar";
 import SessionsSidebar from "./SessionsSidebar";
 import MainContent from "./MainContent";
@@ -52,7 +51,9 @@ const StudentDashboard = () => {
       const approvedEnrollments = studentEnrollments.filter(
         (e) => e.status === "approved"
       );
-      const enrolledCourseIds = approvedEnrollments.map((e) => getEntityId(e.courseId));
+      const enrolledCourseIds = approvedEnrollments.map((e) =>
+        getEntityId(e.courseId)
+      );
       const studentCourses = courses.filter((course) =>
         enrolledCourseIds.includes(getEntityId(course))
       );
@@ -107,7 +108,9 @@ const StudentDashboard = () => {
   };
 
   const getCourseSessions = (courseId) =>
-    sessions.filter((session) => getEntityId(session.courseId) === String(courseId));
+    sessions.filter(
+      (session) => getEntityId(session.courseId) === String(courseId)
+    );
 
   const handleCourseSelect = (course) => {
     setSelectedCourse(course);

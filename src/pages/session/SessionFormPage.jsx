@@ -11,6 +11,11 @@ import { courseService } from "../../services/courseService";
 import { useAuth } from "../../hooks/useAuth";
 import { showToast } from "../../components/Toast";
 import { routes } from "../../constants/routes";
+import {
+  extractArray,
+  extractItem,
+  getEntityId,
+} from "../../utils/apiHelpers";
 
 const SessionFormPage = () => {
   const [formData, setFormData] = useState({
@@ -43,27 +48,12 @@ const SessionFormPage = () => {
   const fetchCourses = async () => {
     try {
       const response = await courseService.getAllCourses();
-
-      // Handle the backend response structure: { data: { list: [...] } }
-      let coursesData = [];
-      if (response && response.data) {
-        if (Array.isArray(response.data)) {
-          coursesData = response.data;
-        } else if (response.data.list && Array.isArray(response.data.list)) {
-          coursesData = response.data.list;
-        } else {
-          console.warn("Unexpected courses data structure:", response.data);
-          coursesData = [];
-        }
-      }
+      const coursesData = extractArray(response);
 
       // Filter courses for the current instructor
-      const userId = user._id || user.id;
+      const userId = getEntityId(user);
       const instructorCourses = coursesData.filter((course) => {
-        const courseInstructorId =
-          course.instructorId?._id ||
-          course.instructorId?.id ||
-          course.instructorId;
+        const courseInstructorId = getEntityId(course.instructorId);
         return String(courseInstructorId) === String(userId);
       });
 
@@ -78,18 +68,7 @@ const SessionFormPage = () => {
   const fetchSession = async () => {
     try {
       const response = await sessionService.getSession(id);
-
-      // Handle the backend response structure
-      let sessionData;
-      if (response && response.data) {
-        if (response.data.session) {
-          sessionData = response.data.session;
-        } else {
-          sessionData = response.data;
-        }
-      } else {
-        sessionData = response;
-      }
+      const sessionData = extractItem(response, ["session"]);
 
       if (sessionData) {
         setFormData({
@@ -99,11 +78,7 @@ const SessionFormPage = () => {
           date: sessionData.date
             ? new Date(sessionData.date).toISOString().slice(0, 16)
             : "",
-          courseId:
-            sessionData.courseId?._id ||
-            sessionData.courseId?.id ||
-            sessionData.courseId ||
-            "",
+          courseId: getEntityId(sessionData.courseId) || "",
         });
       }
     } catch (error) {

@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
-import { getQuickLinks } from "../../utils/getQuickLinks";
 import { routes } from "../../constants/routes";
 
 const QuickLinksSidebar = ({ user, dashboardLink }) => {
-  const quickLinks = getQuickLinks(user);
+  // Quick links are assembled below based on the user's role
 
   const getRoleSpecificLinks = () => {
     const links = [];

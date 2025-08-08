@@ -4,17 +4,16 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Header from "../../components/Header";
 import Button from "../../components/Button";
-import Modal from "../../components/Modal";
 import { useAuth } from "../../hooks/useAuth";
 import { userService } from "../../services/userService";
 import { authService } from "../../services/authService";
 import { showToast } from "../../components/Toast";
 import { getDashboardLink } from "../../utils/getDashboardRoute";
-import { routes } from "../../constants/routes";
 import ProfileHeader from "./ProfileHeader";
 import PersonalInformation from "./PersonalInformation";
 import QuickLinksSidebar from "./QuickLinksSidebar";
 import ChangePasswordModal from "./ChangePasswordModal";
+import { getEntityId } from "../../utils/apiHelpers";
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -67,7 +66,7 @@ const ProfilePage = () => {
 
     try {
       setLoading(true);
-      const userId = user._id || user.id;
+      const userId = getEntityId(user);
       await userService.updateProfile(userId, { name: formData.name.trim() });
       updateUser({ name: formData.name.trim() });
       setIsEditing(false);
@@ -117,7 +116,7 @@ const ProfilePage = () => {
 
     try {
       setLoading(true);
-      const userId = user._id || user.id;
+      const userId = getEntityId(user);
       await authService.changePassword(userId, {
         oldPassword: passwordData.oldPassword,
         newPassword: passwordData.newPassword,

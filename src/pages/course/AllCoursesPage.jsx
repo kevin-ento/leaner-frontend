@@ -54,7 +54,7 @@ const AllCoursesPage = () => {
       setCourses(coursesData);
       setEnrollments(studentEnrollments);
       setSessions(sessionsData);
-    } catch (error) {
+    } catch (_error) {
       showToast("Failed to fetch courses", "error");
     } finally {
       setLoading(false);
@@ -70,7 +70,7 @@ const AllCoursesPage = () => {
         "success"
       );
       fetchData();
-    } catch (error) {
+    } catch (_error) {
       showToast("Enrollment failed", "error");
     } finally {
       setEnrolling((prev) => ({ ...prev, [courseId]: false }));
@@ -111,7 +111,7 @@ const AllCoursesPage = () => {
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <div className="mb-6">
-          <Link to={getDashboardLink()}>
+          <Link to={dashboardLink}>
             <Button variant="outline" size="sm">
               ← Back to Dashboard
             </Button>

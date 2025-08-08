@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Header from "../../components/Header";
 import Button from "../../components/Button";
 import { courseService } from "../../services/courseService";
@@ -20,7 +20,6 @@ const MyCoursesPage = () => {
   const [loading, setLoading] = useState(true);
 
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const dashboardLink = getDashboardLink(user);
 
@@ -45,17 +44,21 @@ const MyCoursesPage = () => {
 
       const studentEnrollments = enrollments.filter((enrollment) => {
         const enrollmentStudentId = getEntityId(enrollment.studentId);
-        return enrollmentStudentId === userId && enrollment.status === "approved";
+        return (
+          enrollmentStudentId === userId && enrollment.status === "approved"
+        );
       });
 
-      const enrolledCourseIds = studentEnrollments.map((e) => getEntityId(e.courseId));
+      const enrolledCourseIds = studentEnrollments.map((e) =>
+        getEntityId(e.courseId)
+      );
       const myCourses = courses.filter((course) =>
         enrolledCourseIds.includes(getEntityId(course))
       );
 
       setEnrolledCourses(myCourses);
       setSessions(sessionsData);
-    } catch (error) {
+    } catch (_error) {
       showToast("Failed to fetch courses", "error");
     } finally {
       setLoading(false);
@@ -63,8 +66,9 @@ const MyCoursesPage = () => {
   };
 
   const getSessionCount = (courseId) =>
-    sessions.filter((session) => getEntityId(session.courseId) === String(courseId))
-      .length;
+    sessions.filter(
+      (session) => getEntityId(session.courseId) === String(courseId)
+    ).length;
 
   if (loading) return <LoadingScreen />;
 

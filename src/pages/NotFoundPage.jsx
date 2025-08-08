@@ -2,6 +2,7 @@
 
 import { Link } from "react-router-dom";
 import Button from "../components/Button";
+import { routes } from "../constants/routes";
 
 const NotFoundPage = () => {
   return (

@@ -60,7 +60,7 @@ const CourseDetailsPage = () => {
       setCourse(courseData);
       setSessions(courseSessions);
       setEnrollmentStatus(enrollment ? enrollment.status : null);
-    } catch (error) {
+    } catch (_error) {
       showToast("Failed to fetch course details", "error");
       navigate(routes.allCourses);
     } finally {
@@ -77,7 +77,7 @@ const CourseDetailsPage = () => {
         "success"
       );
       fetchCourseDetails();
-    } catch (error) {
+    } catch (_error) {
       showToast("Enrollment failed", "error");
     } finally {
       setEnrolling(false);

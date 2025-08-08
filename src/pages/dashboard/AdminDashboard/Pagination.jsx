@@ -3,7 +3,6 @@ import Button from "../../../components/Button";
 const Pagination = ({
   currentPage,
   totalPages,
-  usersPerPage,
   filteredUsers,
   indexOfFirstUser,
   indexOfLastUser,

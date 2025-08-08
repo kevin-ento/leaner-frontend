@@ -42,7 +42,7 @@ const CourseFormPage = () => {
           category: courseData.category || "",
         });
       }
-    } catch (error) {
+    } catch (_error) {
       showToast("Failed to fetch course details", "error");
       navigate(routes.instructor);
     }

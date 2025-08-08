@@ -1,78 +1,41 @@
+import { routes } from "../constants/routes";
 import apiClient from "./apiClient";
 
 class AuthService {
   async register(userData) {
-    try {
-      const response = await apiClient.post("/auth/register", userData);
-      return response.data;
-    } catch (error) {
-      console.error("Registration error:", error);
-      throw error;
-    }
+    return (
+      await apiClient.post(`/auth${routes.register}`, userData)
+    ).data;
   }
 
   async login(credentials) {
-    try {
-      const response = await apiClient.post("/auth/login", credentials);
-      return response.data;
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
-    }
+    return (
+      await apiClient.post(`/auth${routes.login}`, credentials)
+    ).data;
   }
 
   async verifyOtp(data) {
-    try {
-      const response = await apiClient.post("/auth/verify-otp", data);
-      return response.data;
-    } catch (error) {
-      console.error("OTP verification error:", error);
-      throw error;
-    }
+    return (await apiClient.post(`/auth${routes.verifyOtp}`, data)).data;
   }
 
   async forgotPassword(email) {
-    try {
-      const response = await apiClient.post("/auth/forget-password", { email });
-      return response.data;
-    } catch (error) {
-      console.error("Forgot password error:", error);
-      throw error;
-    }
+    return (
+      await apiClient.post(`/auth${routes.forgetPassword}`, { email })
+    ).data;
   }
 
   async resetPassword(data) {
-    try {
-      const response = await apiClient.post("/auth/reset-password", data);
-      return response.data;
-    } catch (error) {
-      console.error("Reset password error:", error);
-      throw error;
-    }
+    return (await apiClient.post(`/auth${routes.resetPassword}`, data)).data;
   }
 
   async changePassword(userId, data) {
-    try {
-      const response = await apiClient.put(
-        `/auth/change-password/${userId}`,
-        data
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Change password error:", error);
-      throw error;
-    }
+    return (
+      await apiClient.put(`/auth${routes.changePassword(userId)}`, data)
+    ).data;
   }
 
   async getMe() {
-    try {
-      let response;
-      response = await apiClient.get("/user/me");
-      return response.data;
-    } catch (error) {
-      console.error("Get me error:", error);
-      throw error;
-    }
+    return (await apiClient.get("/user/me")).data;
   }
 }
 

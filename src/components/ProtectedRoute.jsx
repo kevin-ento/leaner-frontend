@@ -1,31 +1,33 @@
-"use client"
+"use client";
 
-import { Navigate } from "react-router-dom"
-import { useAuth } from "../hooks/useAuth"
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { routes } from "../constants/routes";
+import LoadingScreen from "./LoadingScreen";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
-  const { isAuthenticated, user, loading } = useAuth()
+  const { isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    )
+    return <LoadingScreen />;
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to={routes.login} replace />;
   }
 
   if (requiredRole && user?.role !== requiredRole) {
     // Redirect to appropriate dashboard based on user role
     const dashboardRoute =
-      user?.role === "instructor" ? "/instructor-dashboard" : user?.role === "admin" ? "/admin-dashboard" : "/dashboard"
-    return <Navigate to={dashboardRoute} replace />
+      user?.role === "instructor"
+        ? routes.instructor
+        : user?.role === "admin"
+        ? routes.admin
+        : routes.student;
+    return <Navigate to={dashboardRoute} replace />;
   }
 
-  return children
-}
+  return children;
+};
 
-export default ProtectedRoute
+export default ProtectedRoute;

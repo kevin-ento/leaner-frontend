@@ -1,88 +1,99 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
-import { authService } from "../../services/authService"
-import Button from "../../components/Button"
-import Input from "../../components/Input"
-import { showToast } from "../../components/Toast"
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { authService } from "../../services/authService";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import { showToast } from "../../components/Toast";
+import { routes } from "../../constants/routes";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const ResetPasswordPage = () => {
   const [formData, setFormData] = useState({
     password: "",
     confirmPassword: "",
-  })
-  const [loading, setLoading] = useState(false)
-  const [errors, setErrors] = useState({})
+  });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const token = searchParams.get("token")
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
   useEffect(() => {
     if (!token) {
-      navigate("/login")
+      navigate(routes.login);
     }
-  }, [token, navigate])
+  }, [token, navigate]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
+    }));
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
         [name]: "",
-      }))
+      }));
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
     if (!formData.password) {
-      newErrors.password = "Password is required"
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
+      newErrors.password = "Password must be at least 6 characters";
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match"
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       await authService.resetPassword({
         token,
         password: formData.password,
-      })
-      showToast("Password reset successfully!", "success")
-      navigate("/login")
+      });
+      showToast("Password reset successfully!", "success");
+      navigate(routes.login);
     } catch (error) {
-      showToast(error.response?.data?.message || "Password reset failed", "error")
+      showToast(
+        error.response?.data?.message || "Password reset failed",
+        "error"
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  if (loading) return <LoadingScreen fullHeight={false} />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Reset Password</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">Enter your new password</p>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            Reset Password
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            Enter your new password
+          </p>
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -114,7 +125,7 @@ const ResetPasswordPage = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ResetPasswordPage
+export default ResetPasswordPage;

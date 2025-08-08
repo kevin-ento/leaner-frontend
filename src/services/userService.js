@@ -2,33 +2,19 @@ import apiClient from "./apiClient";
 
 class UserService {
   async updateProfile(userId, data) {
-    try {
-      const response = await apiClient.put(`/user/${userId}`, data);
-      return response.data;
-    } catch (error) {
-      console.error("Update profile error:", error);
-      throw error;
-    }
+    return (await apiClient.put(`/user/${userId}`, data)).data;
   }
 
   async getProfile(userId) {
-    try {
-      const response = await apiClient.get(`/user/${userId}`);
-      return response.data;
-    } catch (error) {
-      console.error("Get profile error:", error);
-      throw error;
-    }
+    return (await apiClient.get(`/user/${userId}`)).data;
   }
 
   async getAllUsers() {
-    const response = await apiClient.get("/user");
-    return response.data;
+    return (await apiClient.get("/user")).data;
   }
 
   async deleteUser(userId) {
-    const response = await apiClient.delete(`/user/${userId}`);
-    return response.data;
+    return (await apiClient.delete(`/user/${userId}`)).data;
   }
 }
 

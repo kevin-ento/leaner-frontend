@@ -1,80 +1,82 @@
-"use client"
+"use client";
 
-import { Routes, Route, Navigate } from "react-router-dom"
-import { useAuth } from "../hooks/useAuth"
-import ProtectedRoute from "../components/ProtectedRoute"
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import ProtectedRoute from "../components/ProtectedRoute";
+import { getDashboardLink } from "../utils/getDashboardRoute";
+import LoadingScreen from "../components/LoadingScreen";
 
 // Auth Pages
-import LoginPage from "../pages/auth/LoginPage"
-import RegisterPage from "../pages/auth/RegisterPage"
-import VerifyOtpPage from "../pages/auth/VerifyOtpPage"
-import ForgetPasswordPage from "../pages/auth/ForgetPasswordPage"
-import ResetPasswordOtpPage from "../pages/auth/ResetPasswordOtpPage"
-import ResetPasswordPage from "../pages/auth/ResetPasswordPage"
-import ChangePasswordPage from "../pages/auth/ChangePasswordPage"
+import LoginPage from "../pages/auth/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
+import VerifyOtpPage from "../pages/auth/VerifyOtpPage";
+import ForgetPasswordPage from "../pages/auth/ForgetPasswordPage";
+import ResetPasswordOtpPage from "../pages/auth/ResetPasswordOtpPage";
+import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
+import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
 
 // Dashboard Pages
-import StudentDashboard from "../pages/dashboard/StudentDashboard"
-import InstructorDashboard from "../pages/dashboard/InstructorDashboard"
-import AdminDashboard from "../pages/dashboard/AdminDashboard"
+import StudentDashboard from "../pages/dashboard/StudentDashboard/index";
+import InstructorDashboard from "../pages/dashboard/InstructorDashboard/index";
+import AdminDashboard from "../pages/dashboard/AdminDashboard/index";
 
 // Course Pages
-import MyCoursesPage from "../pages/course/MyCoursesPage"
-import AllCoursesPage from "../pages/course/AllCoursesPage"
-import CourseFormPage from "../pages/course/CourseFormPage"
-import CourseDetailsPage from "../pages/course/CourseDetailsPage"
+import MyCoursesPage from "../pages/course/MyCoursesPage";
+import AllCoursesPage from "../pages/course/AllCoursesPage";
+import CourseFormPage from "../pages/course/CourseFormPage";
+import CourseDetailsPage from "../pages/course/CourseDetailsPage";
 
 // Session Pages
-import SessionFormPage from "../pages/session/SessionFormPage"
+import SessionFormPage from "../pages/session/SessionFormPage";
 
 // Profile Page
-import ProfilePage from "../pages/ProfilePage"
+import ProfilePage from "../pages/profile/index";
 
 // Not Found
-import NotFoundPage from "../pages/NotFoundPage"
+import NotFoundPage from "../pages/NotFoundPage";
+import { routes } from "../constants/routes";
 
 const AppRoutes = () => {
-  const { isAuthenticated, user, loading } = useAuth()
+  const { isAuthenticated, user, loading } = useAuth();
 
-  const getDashboardRoute = () => {
-    if (!user) return "/login"
+  const dashboardRoute = getDashboardLink(user);
 
-    switch (user.role) {
-      case "student":
-        return "/dashboard"
-      case "instructor":
-        return "/instructor-dashboard"
-      case "admin":
-        return "/admin-dashboard"
-      default:
-        return "/dashboard"
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    )
-  }
+  if (loading) return <LoadingScreen />;
 
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/login" element={isAuthenticated ? <Navigate to={getDashboardRoute()} replace /> : <LoginPage />} />
       <Route
-        path="/register"
-        element={isAuthenticated ? <Navigate to={getDashboardRoute()} replace /> : <RegisterPage />}
+        path={routes.login}
+        element={
+          isAuthenticated ? (
+            <Navigate to={dashboardRoute} replace />
+          ) : (
+            <LoginPage />
+          )
+        }
       />
-      <Route path="/verify-otp" element={<VerifyOtpPage />} />
-      <Route path="/forget-password" element={<ForgetPasswordPage />} />
-      <Route path="/reset-password-otp" element={<ResetPasswordOtpPage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route
+        path={routes.register}
+        element={
+          isAuthenticated ? (
+            <Navigate to={dashboardRoute} replace />
+          ) : (
+            <RegisterPage />
+          )
+        }
+      />
+      <Route path={routes.verifyOtp} element={<VerifyOtpPage />} />
+      <Route path={routes.forgetPassword} element={<ForgetPasswordPage />} />
+      <Route
+        path={routes.resetPasswordOtp}
+        element={<ResetPasswordOtpPage />}
+      />
+      <Route path={routes.resetPassword} element={<ResetPasswordPage />} />
 
       {/* Protected Routes with proper role checking */}
       <Route
-        path="/dashboard"
+        path={routes.student}
         element={
           <ProtectedRoute requiredRole="student">
             <StudentDashboard />
@@ -83,7 +85,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/instructor-dashboard"
+        path={routes.instructor}
         element={
           <ProtectedRoute requiredRole="instructor">
             <InstructorDashboard />
@@ -92,7 +94,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/admin-dashboard"
+        path={routes.admin}
         element={
           <ProtectedRoute requiredRole="admin">
             <AdminDashboard />
@@ -101,7 +103,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/courses"
+        path={routes.myCourses}
         element={
           <ProtectedRoute>
             <MyCoursesPage />
@@ -110,7 +112,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/all-courses"
+        path={routes.allCourses}
         element={
           <ProtectedRoute>
             <AllCoursesPage />
@@ -119,7 +121,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/course/:id"
+        path={routes.courseDetails()}
         element={
           <ProtectedRoute>
             <CourseDetailsPage />
@@ -128,7 +130,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/create-course"
+        path={routes.createCourse}
         element={
           <ProtectedRoute requiredRole="instructor">
             <CourseFormPage />
@@ -137,7 +139,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/edit-course/:id"
+        path={routes.editCourse()}
         element={
           <ProtectedRoute requiredRole="instructor">
             <CourseFormPage />
@@ -146,7 +148,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/add-session"
+        path={routes.addSession}
         element={
           <ProtectedRoute requiredRole="instructor">
             <SessionFormPage />
@@ -155,7 +157,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/edit-session/:id"
+        path={routes.editSession()}
         element={
           <ProtectedRoute requiredRole="instructor">
             <SessionFormPage />
@@ -164,7 +166,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/change-password/:userId"
+        path={routes.changePassword()}
         element={
           <ProtectedRoute>
             <ChangePasswordPage />
@@ -173,7 +175,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/profile"
+        path={routes.profile}
         element={
           <ProtectedRoute>
             <ProfilePage />
@@ -182,12 +184,20 @@ const AppRoutes = () => {
       />
 
       {/* Default redirect */}
-      <Route path="/" element={<Navigate to={isAuthenticated ? getDashboardRoute() : "/login"} replace />} />
+      <Route
+        path={routes.home}
+        element={
+          <Navigate
+            to={isAuthenticated ? dashboardRoute : routes.login}
+            replace
+          />
+        }
+      />
 
       {/* 404 */}
-      <Route path="*" element={<NotFoundPage />} />
+      <Route path={routes.notFound} element={<NotFoundPage />} />
     </Routes>
-  )
-}
+  );
+};
 
-export default AppRoutes
+export default AppRoutes;

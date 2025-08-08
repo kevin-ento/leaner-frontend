@@ -1,57 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useAuth } from "../hooks/useAuth"
-import { Link } from "react-router-dom"
-import Button from "./Button"
+import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { Link } from "react-router-dom";
+import Button from "./Button";
+import ThemeToggle from "./ThemeToggle";
+import { getDashboardLink } from "../utils/getDashboardRoute";
+import { getQuickLinks } from "../utils/getQuickLinks";
 
 const Header = ({ title }) => {
-  const { user, logout } = useAuth()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
-  const getDashboardLink = () => {
-    if (!user) return "/"
-
-    switch (user.role) {
-      case "student":
-        return "/dashboard"
-      case "instructor":
-        return "/instructor-dashboard"
-      case "admin":
-        return "/admin-dashboard"
-      default:
-        return "/dashboard"
-    }
-  }
-
-  const getQuickLinks = () => {
-    if (!user) return []
-
-    const baseLinks = [{ label: "Profile", path: "/profile", icon: "👤" }]
-
-    switch (user.role) {
-      case "student":
-        return [
-          { label: "Dashboard", path: "/dashboard", icon: "📊" },
-          { label: "My Courses", path: "/courses", icon: "📚" },
-          { label: "Browse Courses", path: "/all-courses", icon: "🌐" },
-          ...baseLinks,
-        ]
-      case "instructor":
-        return [
-          { label: "Dashboard", path: "/instructor-dashboard", icon: "📊" },
-          { label: "Create Course", path: "/create-course", icon: "➕" },
-          { label: "Add Session", path: "/add-session", icon: "🎥" },
-          ...baseLinks,
-        ]
-      case "admin":
-        return [{ label: "Dashboard", path: "/admin-dashboard", icon: "📊" }, ...baseLinks]
-      default:
-        return baseLinks
-    }
-  }
-
-  const quickLinks = getQuickLinks()
+  const { user, logout } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const dashboardLink = getDashboardLink(user);
+  const quickLinks = getQuickLinks(user);
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
@@ -59,17 +20,23 @@ const Header = ({ title }) => {
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Left Section - Logo and Title */}
           <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-            <Link to={getDashboardLink()} className="flex items-center space-x-2 flex-shrink-0">
+            <Link
+              to={dashboardLink}
+              className="flex items-center space-x-2 flex-shrink-0"
+            >
               <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
                 Learner
               </h1>
             </Link>
-
             {title && (
               <>
-                <span className="text-gray-400 dark:text-gray-500 hidden sm:block">|</span>
+                <span className="text-gray-400 dark:text-gray-500 hidden sm:block">
+                  |
+                </span>
                 <div className="min-w-0 flex-1 sm:flex-none">
-                  <p className="text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 truncate">{title}</p>
+                  <p className="text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 truncate">
+                    {title}
+                  </p>
                 </div>
               </>
             )}
@@ -91,22 +58,31 @@ const Header = ({ title }) => {
               ))}
             </nav>
 
-            {/* User Info */}
+            {/* User Info + Theme */}
             <div className="flex items-center space-x-3 pl-4 border-l border-gray-200 dark:border-gray-700">
+              <ThemeToggle />
               <div className="text-right">
                 <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-32">
                   {user?.name || user?.email}
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                  {user?.role}
+                </div>
               </div>
-              <Button variant="outline" size="sm" onClick={logout} className="bg-transparent">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={logout}
+                className="bg-transparent"
+              >
                 Logout
               </Button>
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden">
+          {/* Mobile Controls */}
+          <div className="lg:hidden flex items-center gap-2">
+            <ThemeToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
@@ -114,12 +90,32 @@ const Header = ({ title }) => {
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               ) : (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               )}
             </button>
@@ -139,14 +135,18 @@ const Header = ({ title }) => {
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
                   <span className="text-sm font-medium text-primary-600 dark:text-primary-400">
-                    {user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
+                    {user?.name?.charAt(0)?.toUpperCase() ||
+                      user?.email?.charAt(0)?.toUpperCase() ||
+                      "U"}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
                     {user?.name || user?.email}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                    {user?.role}
+                  </div>
                 </div>
               </div>
             </div>
@@ -172,12 +172,17 @@ const Header = ({ title }) => {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  logout()
-                  setMobileMenuOpen(false)
+                  logout();
+                  setMobileMenuOpen(false);
                 }}
                 className="w-full bg-transparent"
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -200,7 +205,7 @@ const Header = ({ title }) => {
         ></div>
       )}
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

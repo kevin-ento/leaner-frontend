@@ -1,88 +1,96 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { authService } from "../../services/authService"
-import Button from "../../components/Button"
-import Input from "../../components/Input"
-import Header from "../../components/Header"
-import { showToast } from "../../components/Toast"
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { authService } from "../../services/authService";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import Header from "../../components/Header";
+import { showToast } from "../../components/Toast";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const ChangePasswordPage = () => {
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-  })
-  const [loading, setLoading] = useState(false)
-  const [errors, setErrors] = useState({})
+  });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const { userId } = useParams()
-  const navigate = useNavigate()
+  const { userId } = useParams();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
+    }));
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
         [name]: "",
-      }))
+      }));
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
     if (!formData.currentPassword) {
-      newErrors.currentPassword = "Current password is required"
+      newErrors.currentPassword = "Current password is required";
     }
 
     if (!formData.newPassword) {
-      newErrors.newPassword = "New password is required"
+      newErrors.newPassword = "New password is required";
     } else if (formData.newPassword.length < 6) {
-      newErrors.newPassword = "Password must be at least 6 characters"
+      newErrors.newPassword = "Password must be at least 6 characters";
     }
 
     if (formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match"
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       await authService.changePassword(userId, {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
-      })
-      showToast("Password changed successfully!", "success")
-      navigate("/profile")
+      });
+      showToast("Password changed successfully!", "success");
+      navigate(routes.profile);
     } catch (error) {
-      showToast(error.response?.data?.message || "Password change failed", "error")
+      showToast(
+        error.response?.data?.message || "Password change failed",
+        "error"
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  if (loading) return <LoadingScreen fullHeight={false} />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header title="Change Password" />
 
       <div className="max-w-2xl mx-auto py-8 px-4">
         <div className="card p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Change Password</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Change Password
+          </h2>
 
           <form onSubmit={handleSubmit}>
             <Input
@@ -120,7 +128,11 @@ const ChangePasswordPage = () => {
                 Change Password
               </Button>
 
-              <Button type="button" variant="secondary" onClick={() => navigate("/profile")}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => navigate(routes.profile)}
+              >
                 Cancel
               </Button>
             </div>
@@ -128,7 +140,7 @@ const ChangePasswordPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ChangePasswordPage
+export default ChangePasswordPage;

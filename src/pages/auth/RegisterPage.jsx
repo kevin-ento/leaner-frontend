@@ -1,11 +1,13 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { useAuth } from "../../hooks/useAuth"
-import Button from "../../components/Button"
-import Input from "../../components/Input"
-import { showToast } from "../../components/Toast"
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import { showToast } from "../../components/Toast";
+import { routes } from "../../constants/routes";
+import LoadingScreen from "../../components/LoadingScreen";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -14,92 +16,102 @@ const RegisterPage = () => {
     password: "",
     confirmPassword: "",
     role: "student",
-  })
-  const [loading, setLoading] = useState(false)
-  const [errors, setErrors] = useState({})
+  });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const { register } = useAuth()
-  const navigate = useNavigate()
+  const { register, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
+    }));
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
         [name]: "",
-      }))
+      }));
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
     if (!formData.name) {
-      newErrors.name = "Name is required"
+      newErrors.name = "Name is required";
     }
 
     if (!formData.email) {
-      newErrors.email = "Email is required"
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid"
+      newErrors.email = "Email is invalid";
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required"
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
+      newErrors.password = "Password must be at least 6 characters";
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match"
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
-    setLoading(true)
+    setLoading(true);
 
     const result = await register({
       name: formData.name,
       email: formData.email,
       password: formData.password,
       role: formData.role,
-    })
+    });
 
-    setLoading(false)
+    setLoading(false);
 
     if (result.success) {
-      showToast("Registration successful! Please verify your email.", "success")
+      showToast(
+        "Registration successful! Please verify your email.",
+        "success"
+      );
       // Check if email verification is required
       if (result.data?.requiresVerification !== false) {
-        navigate("/verify-otp", { state: { email: formData.email } })
+        navigate(routes.verifyOtp, { state: { email: formData.email } });
       } else {
-        navigate("/login")
+        navigate(routes.login);
       }
     } else {
-      showToast(result.error || "Registration failed", "error")
+      showToast(result.error || "Registration failed", "error");
     }
-  }
+  };
+
+  if (authLoading) return <LoadingScreen />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            Create your account
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Or{" "}
-            <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
+            <Link
+              to={routes.login}
+              className="font-medium text-primary-600 hover:text-primary-500"
+            >
               sign in to your existing account
             </Link>
           </p>
@@ -128,10 +140,15 @@ const RegisterPage = () => {
             />
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Role <span className="text-red-500 ml-1">*</span>
               </label>
-              <select name="role" value={formData.role} onChange={handleChange} className="input-field">
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="input-field"
+              >
                 <option value="student">Student</option>
                 <option value="instructor">Instructor</option>
               </select>
@@ -164,7 +181,7 @@ const RegisterPage = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default RegisterPage
+export default RegisterPage;

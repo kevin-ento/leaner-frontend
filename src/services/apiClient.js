@@ -1,4 +1,5 @@
 import axios from "axios";
+import { routes } from "../constants/routes";
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1",
@@ -33,17 +34,17 @@ apiClient.interceptors.response.use(
       // Only redirect to login if we're not already on auth pages
       const currentPath = window.location.pathname;
       const authPages = [
-        "/login",
-        "/register",
-        "/verify-otp",
-        "/forget-password",
-        "/reset-password",
-        "/reset-password-otp",
+        routes.login,
+        routes.register,
+        routes.verifyOtp,
+        routes.forgetPassword,
+        routes.resetPassword,
+        routes.resetPasswordOtp,
       ];
 
       if (!authPages.includes(currentPath)) {
         localStorage.removeItem("token");
-        window.location.href = "/login";
+        window.location.href = routes.login;
       }
     }
 

@@ -29,9 +29,7 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Handle 401 errors (unauthorized)
     if (error.response?.status === 401) {
-      // Only redirect to login if we're not already on auth pages
       const currentPath = window.location.pathname;
       const authPages = [
         routes.login,

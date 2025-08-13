@@ -8,6 +8,7 @@ import Input from "../../components/Input";
 import { showToast } from "../../components/Toast";
 import { routes } from "../../constants/routes";
 import LoadingScreen from "../../components/LoadingScreen";
+import { EMAIL_REGEX } from "../../constants/regex";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -43,7 +44,7 @@ const LoginPage = () => {
 
     if (!formData.email) {
       newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!EMAIL_REGEX.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
 

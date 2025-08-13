@@ -14,7 +14,7 @@ export const ThemeProvider = ({ children }) => {
     try {
       const stored = localStorage.getItem("theme");
       if (stored === "dark" || stored === "light") return stored;
-      return "dark"; // default to dark
+      return "dark"; 
     } catch {
       return "dark";
     }

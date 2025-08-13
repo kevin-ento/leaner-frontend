@@ -7,9 +7,9 @@ export function getEntityId(entity) {
 export function extractArray(response) {
   if (!response) return [];
 
-  const maybeData = response.data ?? response;
-  if (Array.isArray(maybeData)) return maybeData;
-  if (maybeData && Array.isArray(maybeData.list)) return maybeData.list;
+  const resData = response.data ?? response;
+  if (Array.isArray(resData)) return resData;
+  if (resData && Array.isArray(resData.list)) return resData.list;
   return [];
 }
 

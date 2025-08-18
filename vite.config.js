@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    // Proxy not required anymore since we call the Render URL directly by default
   },
   css: {
     postcss: "./postcss.config.js",

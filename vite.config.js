@@ -6,7 +6,6 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
-    // Proxy not required anymore since we call the Render URL directly by default
   },
   preview: {
     host: "0.0.0.0",
@@ -14,8 +13,8 @@ export default defineConfig({
     allowedHosts: [
       "localhost",
       "127.0.0.1",
-      // Render hostname(s)
       "leaner-frontend.onrender.com",
+      "leaner-frontend.vercel.app",
     ],
   },
   css: {

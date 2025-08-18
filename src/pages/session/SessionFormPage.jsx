@@ -11,11 +11,7 @@ import { courseService } from "../../services/courseService";
 import { useAuth } from "../../hooks/useAuth";
 import { showToast } from "../../components/Toast";
 import { routes } from "../../constants/routes";
-import {
-  extractArray,
-  extractItem,
-  getEntityId,
-} from "../../utils/apiHelpers";
+import { extractArray, extractItem, getEntityId } from "../../utils/apiHelpers";
 
 const SessionFormPage = () => {
   const [formData, setFormData] = useState({
@@ -245,7 +241,7 @@ const SessionFormPage = () => {
             </div>
 
             <Input
-              label="Video URL (Optional)"
+              label="Video URL"
               name="videoUrl"
               type="url"
               value={formData.videoUrl}

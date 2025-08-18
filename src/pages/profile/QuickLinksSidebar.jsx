@@ -27,12 +27,12 @@ const QuickLinksSidebar = ({ user, dashboardLink }) => {
         {
           title: "➕ Create Course",
           description: "Add a new course",
-          path: "/course-form",
+          path: "/create-course",
         },
         {
           title: "🎥 Create Session",
           description: "Add a new session",
-          path: "/session-form",
+          path: "/add-session",
         }
       );
     }

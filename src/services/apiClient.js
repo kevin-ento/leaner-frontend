@@ -1,9 +1,13 @@
 import axios from "axios";
 import { routes } from "../constants/routes";
 
+// Resolve baseURL: prefer env vars; fallback to Render URL
+const resolvedBaseUrl = import.meta.env.VITE_API_URL;
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1",
-  timeout: 10000,
+  baseURL: resolvedBaseUrl,
+  // Increase timeout to better handle cold starts on free-tier hosting providers
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },

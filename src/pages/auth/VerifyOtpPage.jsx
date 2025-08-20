@@ -12,6 +12,7 @@ import { routes } from "../../constants/routes";
 const VerifyOtpPage = () => {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
@@ -53,7 +54,6 @@ const VerifyOtpPage = () => {
 
         // Use the login function to set the auth state
         const loginResult = await login({
-          email,
           token: token,
           user: userData,
         });
@@ -103,15 +103,15 @@ const VerifyOtpPage = () => {
     }
 
     try {
-      setLoading(true);
-      await authService.forgotPassword(email);
+      setResendLoading(true);
+      await authService.forgotPassword({ email });
       showToast("OTP resent successfully!", "success");
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || "Failed to resend OTP";
       showToast(errorMessage, "error");
     } finally {
-      setLoading(false);
+      setResendLoading(false);
     }
   };
 
@@ -153,10 +153,10 @@ const VerifyOtpPage = () => {
               <button
                 type="button"
                 onClick={handleResendOtp}
-                disabled={loading}
+                disabled={loading || resendLoading}
                 className="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 disabled:opacity-50"
               >
-                Didn't receive the code? Resend OTP
+                {resendLoading ? "Resending OTP..." : "Didn't receive the code? Resend OTP"}
               </button>
 
               <button

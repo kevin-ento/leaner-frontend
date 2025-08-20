@@ -20,11 +20,11 @@ const ForgetPasswordPage = () => {
 
     if (!email) {
       showToast("Email is required", "error");
-      return;
+      return; 
     }
 
     try {
-      // setLoading(true)
+      setLoading(true);
       await authService.forgotPassword({ email });
       showToast("OTP sent to your email! Check your inbox.", "success");
 
@@ -41,7 +41,7 @@ const ForgetPasswordPage = () => {
     }
   };
 
-  if (loading) return <LoadingScreen fullHeight={false} />;
+  // Remove full-screen loading - let the button handle loading state
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -76,12 +76,19 @@ const ForgetPasswordPage = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
+                  disabled={loading}
                 />
               </div>
 
               <Button type="submit" className="w-full" loading={loading}>
                 Send Reset OTP
               </Button>
+              
+              {loading && (
+                <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+                  Sending OTP to your email...
+                </div>
+              )}
             </form>
 
             <div className="mt-6 text-center space-y-2">

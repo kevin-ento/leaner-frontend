@@ -1,17 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "../../../components/Header";
 import { courseService } from "../../../services/courseService";
 import { enrollmentService } from "../../../services/enrollmentService";
 import { sessionService } from "../../../services/sessionService";
 import { useAuth } from "../../../hooks/useAuth";
 import { showToast } from "../../../components/Toast";
+import LoadingScreen from "../../../components/LoadingScreen";
 import CoursesSidebar from "./CoursesSidebar";
 import SessionsSidebar from "./SessionsSidebar";
 import MainContent from "./MainContent";
 import QuickActionsBar from "./QuickActionsBar";
-import LoadingScreen from "../../../components/LoadingScreen";
 import { extractArray, getEntityId } from "../../../utils/apiHelpers";
 
 const StudentDashboard = () => {
@@ -91,7 +91,19 @@ const StudentDashboard = () => {
         "Enrollment request sent! Wait for instructor approval.",
         "success"
       );
-      fetchData();
+      
+      // Update local state immediately instead of refetching
+      const course = allCourses.find(c => getEntityId(c) === String(courseId));
+      if (course) {
+        const newEnrollment = {
+          _id: `temp-${Date.now()}`, // Temporary ID
+          courseId: courseId,
+          studentId: user,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+        };
+        setEnrollments(prev => [...prev, newEnrollment]);
+      }
     } catch (error) {
       console.error("Enrollment failed:", error);
       showToast("Enrollment failed", "error");
@@ -112,22 +124,36 @@ const StudentDashboard = () => {
       (session) => getEntityId(session.courseId) === String(courseId)
     );
 
-  const handleCourseSelect = (course) => {
+  const handleCourseSelect = useCallback((course) => {
     setSelectedCourse(course);
     setSelectedSession(null);
     // Auto-select first session if available
     const courseId = getEntityId(course);
     const courseSessions = getCourseSessions(courseId);
     if (courseSessions.length > 0) {
-      setSelectedSession(courseSessions[0]);
+      // Add a small delay to ensure smooth transition
+      setTimeout(() => {
+        setSelectedSession(courseSessions[0]);
+      }, 200);
     }
     setSidebarOpen(false); // Close mobile sidebar
-  };
+  }, [getCourseSessions]);
 
-  if (loading) return <LoadingScreen />;
+  const handleSessionSelect = useCallback((session) => {
+    // Prevent unnecessary re-renders if selecting the same session
+    if (selectedSession && (selectedSession._id || selectedSession.id) === (session._id || session.id)) {
+      return;
+    }
+    setSelectedSession(session);
+  }, [selectedSession]);
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+  const handleBackToCourse = useCallback(() => {
+    setSelectedSession(null);
+  }, []);
+
+  // Skeleton loading component
+  const DashboardSkeleton = () => (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <Header title="Student Dashboard" />
 
       <QuickActionsBar
@@ -143,17 +169,110 @@ const StudentDashboard = () => {
         {sidebarOpen && (
           <div className="fixed inset-0 z-40 lg:hidden">
             <div
-              className="fixed inset-0 bg-gray-600 bg-opacity-75"
+              className="fixed inset-0 bg-gray-600 dark:bg-gray-800 backdrop-blur-sm"
               onClick={() => setSidebarOpen(false)}
             ></div>
-            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-gray-800">
+            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-gray-800 backdrop-blur-md border-r border-gray-200 dark:border-gray-700">
               <div className="absolute top-0 right-0 -mr-12 pt-2">
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                  className="ml-1 flex items-center justify-center h-10 w-10 rounded-full bg-white dark:bg-gray-800 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
                 >
                   <svg
-                    className="h-6 w-6 text-white"
+                    className="h-6 w-6 text-gray-600 dark:text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="animate-pulse p-4 space-y-4">
+                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop Left Sidebar - Courses */}
+        <div className="hidden lg:flex lg:w-80 lg:flex-col">
+          <div className="animate-pulse p-4 space-y-4">
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+            <div className="space-y-3">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <div className="text-center p-4 animate-pulse">
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-64 mx-auto mb-2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-48 mx-auto"></div>
+            </div>
+          </div>
+        </main>
+
+        {/* Desktop Right Sidebar - Sessions */}
+        <div className="hidden lg:flex lg:w-80 lg:flex-col">
+          <div className="animate-pulse p-4 space-y-4">
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (loading) return <DashboardSkeleton />;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <Header title="Student Dashboard" />
+
+      <QuickActionsBar
+        user={user}
+        selectedCourse={selectedCourse}
+        selectedSession={selectedSession}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
+
+      <div className="flex" style={{ height: "calc(100vh - 120px)" }}>
+        {/* Mobile Sidebar Overlay */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 z-40 lg:hidden">
+            <div
+              className="fixed inset-0 bg-gray-600 dark:bg-gray-800 backdrop-blur-sm"
+              onClick={() => setSidebarOpen(false)}
+            ></div>
+            <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-gray-800 backdrop-blur-md border-r border-gray-200 dark:border-gray-700 shadow-2xl">
+              <div className="absolute top-0 right-0 -mr-12 pt-2">
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="ml-1 flex items-center justify-center h-10 w-10 rounded-full bg-white dark:bg-gray-800 backdrop-blur-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-colors duration-200"
+                >
+                  <svg
+                    className="h-6 w-6 text-gray-600 dark:text-gray-400"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -202,7 +321,8 @@ const StudentDashboard = () => {
             selectedSession={selectedSession}
             enrolledCourses={enrolledCourses}
             getCourseSessions={getCourseSessions}
-            setSelectedSession={setSelectedSession}
+            setSelectedSession={handleSessionSelect}
+            onBackToCourse={handleBackToCourse}
           />
         </main>
 
@@ -212,7 +332,7 @@ const StudentDashboard = () => {
             selectedCourse={selectedCourse}
             selectedSession={selectedSession}
             getCourseSessions={getCourseSessions}
-            setSelectedSession={setSelectedSession}
+            setSelectedSession={handleSessionSelect}
           />
         </div>
       </div>

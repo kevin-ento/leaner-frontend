@@ -18,6 +18,7 @@ const ResetPasswordOtpPage = () => {
     confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -94,18 +95,18 @@ const ResetPasswordOtpPage = () => {
     }
 
     try {
-      setLoading(true);
+      setResendLoading(true);
       await authService.forgotPassword({ email: formData.email });
       showToast("New OTP sent to your email", "success");
     } catch (error) {
       console.error("Failed to resend OTP:", error);
       showToast("Failed to resend OTP", "error");
     } finally {
-      setLoading(false);
+      setResendLoading(false);
     }
   };
 
-  if (loading) return <LoadingScreen fullHeight={false} />;
+  if (loading) return <LoadingScreen message="Verifying OTP..." />;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -164,10 +165,10 @@ const ResetPasswordOtpPage = () => {
                   <button
                     type="button"
                     onClick={handleResendOtp}
-                    className="text-sm text-primary-600 hover:text-primary-500"
-                    disabled={loading}
+                    className="text-sm text-primary-600 hover:text-primary-500 disabled:opacity-50"
+                    disabled={loading || resendLoading}
                   >
-                    Resend OTP
+                    {resendLoading ? "Resending..." : "Resend OTP"}
                   </button>
                 </div>
               </div>

@@ -9,7 +9,6 @@ import { courseService } from "../../services/courseService";
 import { showToast } from "../../components/Toast";
 import { Link } from "react-router-dom";
 import { routes } from "../../constants/routes";
-import LoadingScreen from "../../components/LoadingScreen";
 import { extractItem } from "../../utils/apiHelpers";
 
 const CourseFormPage = () => {
@@ -19,6 +18,7 @@ const CourseFormPage = () => {
     category: "",
   });
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
@@ -33,6 +33,7 @@ const CourseFormPage = () => {
 
   const fetchCourse = async () => {
     try {
+      setInitialLoading(true);
       const response = await courseService.getCourse(id);
       const courseData = extractItem(response, ["course"]);
       if (courseData) {
@@ -45,6 +46,8 @@ const CourseFormPage = () => {
     } catch (_error) {
       showToast("Failed to fetch course details", "error");
       navigate(routes.instructor);
+    } finally {
+      setInitialLoading(false);
     }
   };
 
@@ -108,7 +111,54 @@ const CourseFormPage = () => {
     }
   };
 
-  if (loading) return <LoadingScreen fullHeight={false} />;
+  // Show loading screen while fetching course data for editing
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Header title={isEditing ? "Edit Course" : "Create Course"} />
+
+        <div className="max-w-2xl mx-auto py-8 px-4">
+          {/* Back Button */}
+          <div className="mb-6">
+            <Link to={routes.instructor}>
+              <Button variant="outline" size="sm">
+                ← Back to Dashboard
+              </Button>
+            </Link>
+          </div>
+
+          <div className="card p-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              {isEditing ? "Edit Course" : "Create New Course"}
+            </h2>
+
+            {/* Skeleton Form */}
+            <div className="space-y-6 animate-pulse">
+              <div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-2"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+              </div>
+              
+              <div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-2"></div>
+                <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+              </div>
+              
+              <div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-2"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+              </div>
+              
+              <div className="flex space-x-4">
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

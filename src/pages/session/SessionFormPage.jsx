@@ -290,7 +290,7 @@ const SessionFormPage = () => {
                 className={`input-field ${
                   errors.courseId ? "border-red-500 focus:ring-red-500" : ""
                 }`}
-                disabled={!!courseIdFromQuery}
+                disabled={isEditing || !!courseIdFromUrl}
               >
                 <option value="">Select a course</option>
                 {courses.map((course) => {

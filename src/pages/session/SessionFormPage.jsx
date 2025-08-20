@@ -27,9 +27,11 @@ const SessionFormPage = () => {
   const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id, courseId: courseIdFromParams } = useParams();
   const [searchParams] = useSearchParams();
   const courseIdFromQuery = searchParams.get("courseId");
+  // Support both old and new URL structures
+  const courseIdFromUrl = courseIdFromParams || courseIdFromQuery;
   const isEditing = !!id;
   const { user } = useAuth();
 
@@ -41,8 +43,8 @@ const SessionFormPage = () => {
         
         if (isEditing) {
           await fetchSession();
-        } else if (courseIdFromQuery) {
-          setFormData((prev) => ({ ...prev, courseId: courseIdFromQuery }));
+        } else if (courseIdFromUrl) {
+          setFormData((prev) => ({ ...prev, courseId: courseIdFromUrl }));
         }
       } catch (error) {
         console.error("Failed to initialize form:", error);
@@ -52,7 +54,7 @@ const SessionFormPage = () => {
     };
     
     initializeForm();
-  }, [id, courseIdFromQuery]);
+  }, [id, courseIdFromUrl]);
 
   const fetchCourses = async () => {
     try {
@@ -170,7 +172,7 @@ const SessionFormPage = () => {
         
         // Navigate back to course management for edit
         if (courseIdForNavigation) {
-          navigate(`${routes.instructor}?courseId=${courseIdForNavigation}`);
+          navigate(routes.instructorWithCourse(courseIdForNavigation));
         } else {
           navigate(routes.instructor);
         }
@@ -180,7 +182,7 @@ const SessionFormPage = () => {
         
         // Navigate back to course management for create
         if (formData.courseId) {
-          navigate(`${routes.instructor}?courseId=${formData.courseId}`);
+          navigate(routes.instructorWithCourse(formData.courseId));
         } else {
           navigate(routes.instructor);
         }
@@ -255,7 +257,7 @@ const SessionFormPage = () => {
   // Get the course title for the back button
   const selectedCourse = courses.find(c => getEntityId(c) === formData.courseId);
   const backButtonText = selectedCourse ? `← Back to ${selectedCourse.title}` : "← Back to Dashboard";
-  const backButtonUrl = selectedCourse ? `${routes.instructor}?courseId=${formData.courseId}` : routes.instructor;
+  const backButtonUrl = selectedCourse ? routes.instructorWithCourse(formData.courseId) : routes.instructor;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

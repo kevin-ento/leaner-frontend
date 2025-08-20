@@ -94,6 +94,15 @@ const AppRoutes = () => {
       />
 
       <Route
+        path={routes.instructorWithCourse()}
+        element={
+          <ProtectedRoute requiredRole="instructor">
+            <InstructorDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path={routes.admin}
         element={
           <ProtectedRoute requiredRole="admin">
@@ -157,7 +166,25 @@ const AppRoutes = () => {
       />
 
       <Route
+        path={routes.addSessionWithCourse()}
+        element={
+          <ProtectedRoute requiredRole="instructor">
+            <SessionFormPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path={routes.editSession()}
+        element={
+          <ProtectedRoute requiredRole="instructor">
+            <SessionFormPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path={routes.editSessionWithCourse()}
         element={
           <ProtectedRoute requiredRole="instructor">
             <SessionFormPage />

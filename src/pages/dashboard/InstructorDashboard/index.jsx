@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Header from "../../../components/Header";
 import Sidebar from "../../../components/Sidebar";
 import Button from "../../../components/Button";
@@ -32,7 +32,8 @@ const InstructorDashboard = () => {
   const [enrolledStudentsLoading, setEnrolledStudentsLoading] = useState(false);
   const [sessionsLoading, setSessionsLoading] = useState(false);
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
+  const { courseId } = useParams();
+  const navigate = useNavigate();
 
   const sidebarItems = [
     {
@@ -53,17 +54,23 @@ const InstructorDashboard = () => {
     fetchData();
   }, []);
 
-  // Restore course management state from URL params on page refresh
+  // Handle course management state based on URL path parameter
   useEffect(() => {
-    const courseId = searchParams.get('courseId');
-    if (courseId && myCourses.length > 0) {
-      const course = myCourses.find(c => getEntityId(c) === courseId);
-      if (course) {
-        setSelectedCourse(course);
-        setActiveView("course-management");
+    if (myCourses.length > 0) {
+      if (courseId) {
+        // Course ID in URL - show course management
+        const course = myCourses.find(c => getEntityId(c) === courseId);
+        if (course) {
+          setSelectedCourse(course);
+          setActiveView("course-management");
+        }
+      } else {
+        // No course ID in URL - show main courses view
+        setSelectedCourse(null);
+        setActiveView("my-courses");
       }
     }
-  }, [myCourses, searchParams]);
+  }, [myCourses, courseId]);
 
   const fetchData = async () => {
     try {
@@ -254,10 +261,8 @@ const InstructorDashboard = () => {
     setActiveView("course-management");
     setSidebarOpen(false);
     
-    // Update URL to persist state on refresh
-    const url = new URL(window.location);
-    url.searchParams.set('courseId', getEntityId(course));
-    window.history.replaceState({}, '', url);
+    // Update URL to use path parameter instead of query parameter
+    navigate(routes.instructorWithCourse(getEntityId(course)));
   };
 
   const handleDeleteCourseClick = (course) => {
@@ -269,10 +274,8 @@ const InstructorDashboard = () => {
     setSelectedCourse(null);
     setActiveView("my-courses");
     
-    // Remove courseId from URL
-    const url = new URL(window.location);
-    url.searchParams.delete('courseId');
-    window.history.replaceState({}, '', url);
+    // Navigate back to main instructor dashboard
+    navigate(routes.instructor);
   };
 
   const renderMyCourses = () => (

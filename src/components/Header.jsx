@@ -2,17 +2,42 @@
 
 import { useState, memo } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Button from "./Button";
 import ThemeToggle from "./ThemeToggle";
 import { getDashboardLink } from "../utils/getDashboardRoute";
 import { getQuickLinks } from "../utils/getQuickLinks";
+import { routes } from "../constants/routes";
 
 const Header = memo(({ title }) => {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
   const dashboardLink = getDashboardLink(user);
   const quickLinks = getQuickLinks(user);
+
+  // Determine the logo navigation link
+  // If we're on a course-specific page, go to main dashboard
+  // If we're on main dashboard, stay there
+  const getLogoLink = () => {
+    if (!user) return routes.home;
+    
+    // Check if we're on a course-specific route
+    if (location.pathname.includes('/instructor-dashboard/') && user.role === 'instructor') {
+      return routes.instructor; // Go to main instructor dashboard
+    }
+    if (location.pathname.includes('/dashboard/') && user.role === 'student') {
+      return routes.student; // Go to main student dashboard
+    }
+    if (location.pathname.includes('/admin-dashboard/') && user.role === 'admin') {
+      return routes.admin; // Go to main admin dashboard
+    }
+    
+    // Default to role dashboard
+    return dashboardLink;
+  };
+
+  const logoLink = getLogoLink();
 
   return (
     <header className="bg-white dark:bg-gray-900 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
@@ -21,7 +46,7 @@ const Header = memo(({ title }) => {
           {/* Left Section - Logo and Title */}
           <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
             <Link
-              to={dashboardLink}
+              to={logoLink}
               className="flex items-center space-x-2 flex-shrink-0 group"
             >
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center shadow-md">

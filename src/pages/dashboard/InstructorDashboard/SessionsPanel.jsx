@@ -12,7 +12,7 @@ const SessionsPanel = ({ courseId, sessions, onDeleteSession, loading = false })
         title="Sessions"
         count={0}
         actions={
-          <Link to={`${routes.addSession}?courseId=${courseId}`}>
+          <Link to={routes.addSessionWithCourse(courseId)}>
             <Button size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
               Add Session
             </Button>
@@ -47,7 +47,7 @@ const SessionsPanel = ({ courseId, sessions, onDeleteSession, loading = false })
       title="Sessions"
       count={sessions.length}
       actions={
-        <Link to={`${routes.addSession}?courseId=${courseId}`}>
+        <Link to={routes.addSessionWithCourse(courseId)}>
           <Button size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
             Add Session
           </Button>
@@ -59,7 +59,7 @@ const SessionsPanel = ({ courseId, sessions, onDeleteSession, loading = false })
           icon="🎥"
           subtitle="No sessions created yet."
           action={
-            <Link to={`${routes.addSession}?courseId=${courseId}`}>
+            <Link to={routes.addSessionWithCourse(courseId)}>
               <Button size="sm" className="text-xs sm:text-sm">
                 Create First Session
               </Button>
@@ -104,7 +104,7 @@ const SessionsPanel = ({ courseId, sessions, onDeleteSession, loading = false })
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Link to={`${routes.editSession(sessionId)}?courseId=${courseId}`} className="flex-1">
+                    <Link to={routes.editSessionWithCourse(sessionId, courseId)} className="flex-1">
                       <Button
                         size="sm"
                         variant="outline"

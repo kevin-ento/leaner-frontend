@@ -8,6 +8,7 @@ export const routes = {
 
   student: "/dashboard",
   instructor: "/instructor-dashboard",
+  instructorWithCourse: (courseId = ":courseId") => `/instructor-dashboard/${courseId}`,
   admin: "/admin-dashboard",
 
   myCourses: "/courses",
@@ -18,7 +19,9 @@ export const routes = {
 
   // Sessions
   addSession: "/add-session",
+  addSessionWithCourse: (courseId = ":courseId") => `/add-session/${courseId}`,
   editSession: (id = ":id") => `/edit-session/${id}`,
+  editSessionWithCourse: (sessionId = ":sessionId", courseId = ":courseId") => `/edit-session/${sessionId}/${courseId}`,
 
   // Profile & Settings
   changePassword: (userId = ":userId") => `/change-password/${userId}`,

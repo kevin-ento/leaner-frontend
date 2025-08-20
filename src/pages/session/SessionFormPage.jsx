@@ -27,12 +27,12 @@ const SessionFormPage = () => {
   const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
-  const { id, courseId: courseIdFromParams } = useParams();
+  const { sessionId, courseId: courseIdFromParams } = useParams();
   const [searchParams] = useSearchParams();
   const courseIdFromQuery = searchParams.get("courseId");
   // Support both old and new URL structures
   const courseIdFromUrl = courseIdFromParams || courseIdFromQuery;
-  const isEditing = !!id;
+  const isEditing = !!sessionId;
   const { user } = useAuth();
 
   useEffect(() => {
@@ -54,7 +54,7 @@ const SessionFormPage = () => {
     };
     
     initializeForm();
-  }, [id, courseIdFromUrl]);
+  }, [sessionId, courseIdFromUrl]);
 
   const fetchCourses = async () => {
     try {
@@ -78,7 +78,7 @@ const SessionFormPage = () => {
 
   const fetchSession = async () => {
     try {
-      const response = await sessionService.getSession(id);
+      const response = await sessionService.getSession(sessionId);
       const sessionData = extractItem(response, ["session"]);
 
       if (sessionData) {
@@ -167,7 +167,7 @@ const SessionFormPage = () => {
       if (isEditing) {
         const courseIdForNavigation = formData.courseId; // Store courseId before deleting
         delete sessionData.courseId;
-        await sessionService.updateSession(id, sessionData);
+        await sessionService.updateSession(sessionId, sessionData);
         showToast("Session updated successfully!", "success");
         
         // Navigate back to course management for edit

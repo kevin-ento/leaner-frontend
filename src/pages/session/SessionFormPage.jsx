@@ -23,23 +23,38 @@ const SessionFormPage = () => {
   });
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id, courseId: courseIdFromParams } = useParams();
   const [searchParams] = useSearchParams();
   const courseIdFromQuery = searchParams.get("courseId");
+  // Support both old and new URL structures
+  const courseIdFromUrl = courseIdFromParams || courseIdFromQuery;
   const isEditing = !!id;
   const { user } = useAuth();
 
   useEffect(() => {
-    fetchCourses();
-    if (isEditing) {
-      fetchSession();
-    } else if (courseIdFromQuery) {
-      setFormData((prev) => ({ ...prev, courseId: courseIdFromQuery }));
-    }
-  }, [id, courseIdFromQuery]);
+    const initializeForm = async () => {
+      try {
+        setInitialLoading(true);
+        await fetchCourses();
+        
+        if (isEditing) {
+          await fetchSession();
+        } else if (courseIdFromUrl) {
+          setFormData((prev) => ({ ...prev, courseId: courseIdFromUrl }));
+        }
+      } catch (error) {
+        console.error("Failed to initialize form:", error);
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+    
+    initializeForm();
+  }, [id, courseIdFromUrl]);
 
   const fetchCourses = async () => {
     try {
@@ -110,6 +125,12 @@ const SessionFormPage = () => {
       newErrors.description = "Session description is required";
     }
 
+    if (!formData.videoUrl.trim()) {
+      newErrors.videoUrl = "Video URL is required";
+    } else if (!isValidUrl(formData.videoUrl)) {
+      newErrors.videoUrl = "Please enter a valid URL";
+    }
+
     if (!formData.date) {
       newErrors.date = "Session date is required";
     }
@@ -120,6 +141,15 @@ const SessionFormPage = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -135,14 +165,28 @@ const SessionFormPage = () => {
       };
 
       if (isEditing) {
+        const courseIdForNavigation = formData.courseId; // Store courseId before deleting
         delete sessionData.courseId;
         await sessionService.updateSession(id, sessionData);
         showToast("Session updated successfully!", "success");
+        
+        // Navigate back to course management for edit
+        if (courseIdForNavigation) {
+          navigate(routes.instructorWithCourse(courseIdForNavigation));
+        } else {
+          navigate(routes.instructor);
+        }
       } else {
         await sessionService.createSession(sessionData);
         showToast("Session created successfully!", "success");
+        
+        // Navigate back to course management for create
+        if (formData.courseId) {
+          navigate(routes.instructorWithCourse(formData.courseId));
+        } else {
+          navigate(routes.instructor);
+        }
       }
-      navigate(routes.instructor);
     } catch (error) {
       console.error("Session operation failed:", error);
       showToast(
@@ -155,6 +199,66 @@ const SessionFormPage = () => {
     }
   };
 
+  // Show loading screen while initializing form
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Header title={isEditing ? "Edit Session" : "Add Session"} />
+
+        <div className="max-w-2xl mx-auto py-8 px-4">
+          {/* Back Button */}
+          <div className="mb-6">
+            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-40 animate-pulse"></div>
+          </div>
+
+          <div className="card p-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              {isEditing ? "Edit Session" : "Add New Session"}
+            </h2>
+
+            {/* Skeleton Form */}
+            <div className="space-y-6 animate-pulse">
+              <div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+              </div>
+              
+              <div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-28 mb-2"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+              </div>
+              
+              <div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-36 mb-2"></div>
+                <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+              </div>
+              
+              <div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 mb-2"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+              </div>
+              
+              <div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-2"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+              </div>
+              
+              <div className="flex space-x-4">
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Get the course title for the back button
+  const selectedCourse = courses.find(c => getEntityId(c) === formData.courseId);
+  const backButtonText = selectedCourse ? `← Back to ${selectedCourse.title}` : "← Back to Dashboard";
+  const backButtonUrl = selectedCourse ? routes.instructorWithCourse(formData.courseId) : routes.instructor;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header title={isEditing ? "Edit Session" : "Add Session"} />
@@ -162,9 +266,9 @@ const SessionFormPage = () => {
       <div className="max-w-2xl mx-auto py-8 px-4">
         {/* Back Button */}
         <div className="mb-6">
-          <Link to={routes.instructor}>
+          <Link to={backButtonUrl}>
             <Button variant="outline" size="sm">
-              ← Back to Dashboard
+              {backButtonText}
             </Button>
           </Link>
         </div>
@@ -248,6 +352,7 @@ const SessionFormPage = () => {
               onChange={handleChange}
               error={errors.videoUrl}
               placeholder="https://example.com/video"
+              required
             />
 
             <Input
@@ -272,7 +377,7 @@ const SessionFormPage = () => {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => navigate(routes.instructor)}
+                onClick={() => navigate(backButtonUrl)}
               >
                 Cancel
               </Button>

@@ -1,40 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Button from "./Button";
 import ThemeToggle from "./ThemeToggle";
 import { getDashboardLink } from "../utils/getDashboardRoute";
 import { getQuickLinks } from "../utils/getQuickLinks";
+import { routes } from "../constants/routes";
 
-const Header = ({ title }) => {
+const Header = memo(({ title }) => {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
   const dashboardLink = getDashboardLink(user);
   const quickLinks = getQuickLinks(user);
 
+  // Determine the logo navigation link
+  // If we're on a course-specific page, go to main dashboard
+  // If we're on main dashboard, stay there
+  const getLogoLink = () => {
+    if (!user) return routes.home;
+    
+    // Check if we're on a course-specific route
+    if (location.pathname.includes('/instructor-dashboard/') && user.role === 'instructor') {
+      return routes.instructor; // Go to main instructor dashboard
+    }
+    if (location.pathname.includes('/dashboard/') && user.role === 'student') {
+      return routes.student; // Go to main student dashboard
+    }
+    if (location.pathname.includes('/admin-dashboard/') && user.role === 'admin') {
+      return routes.admin; // Go to main admin dashboard
+    }
+    
+    // Default to role dashboard
+    return dashboardLink;
+  };
+
+  const logoLink = getLogoLink();
+
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
+    <header className="bg-white dark:bg-gray-900 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Left Section - Logo and Title */}
-          <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+          <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
             <Link
-              to={dashboardLink}
-              className="flex items-center space-x-2 flex-shrink-0"
+              to={logoLink}
+              className="flex items-center space-x-2 flex-shrink-0 group"
             >
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
+              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-lg">L</span>
+              </div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary-600 dark:text-primary-400">
                 Learner
               </h1>
             </Link>
             {title && (
               <>
-                <span className="text-gray-400 dark:text-gray-500 hidden sm:block">
-                  |
-                </span>
+                <div className="hidden sm:block w-px h-6 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
                 <div className="min-w-0 flex-1 sm:flex-none">
-                  <p className="text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 truncate">
+                  <p className="text-sm sm:text-base lg:text-lg font-medium text-gray-700 dark:text-gray-300 truncate">
                     {title}
                   </p>
                 </div>
@@ -43,79 +69,73 @@ const Header = ({ title }) => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-6">
             {/* Quick Links */}
             <nav className="flex items-center space-x-1">
               {quickLinks.slice(0, 3).map((link, index) => (
                 <Link
                   key={index}
                   to={link.path}
-                  className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200"
                 >
-                  <span className="mr-1">{link.icon}</span>
+                  <span className="mr-2">{link.icon}</span>
                   {link.label}
                 </Link>
               ))}
             </nav>
 
             {/* User Info + Theme */}
-            <div className="flex items-center space-x-3 pl-4 border-l border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-4 pl-6 border-l border-gray-200 dark:border-gray-700">
               <ThemeToggle />
-              <div className="text-right">
-                <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-32">
-                  {user?.name || user?.email}
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-md">
+                  <span className="text-white text-sm font-medium">
+                    {user?.name?.charAt(0)?.toUpperCase() ||
+                      user?.email?.charAt(0)?.toUpperCase() ||
+                      "U"}
+                  </span>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-                  {user?.role}
+                <div className="text-right">
+                  <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-32">
+                    {user?.name || user?.email}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                    {user?.role}
+                  </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                  className="bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800"
+                  icon={
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  }
+                >
+                  Logout
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={logout}
-                className="bg-transparent"
-              >
-                Logout
-              </Button>
             </div>
           </div>
 
           {/* Mobile Controls */}
-          <div className="lg:hidden flex items-center gap-2">
+          <div className="lg:hidden flex items-center gap-3">
             <ThemeToggle />
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500"
+              className="p-2 rounded-lg text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-colors duration-200"
               aria-expanded="false"
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               )}
             </button>
@@ -126,25 +146,25 @@ const Header = ({ title }) => {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div
-          className="lg:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 relative z-30"
+          className="lg:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 backdrop-blur-md relative z-30 animate-slide-down"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="px-4 py-3 space-y-1">
+          <div className="px-4 py-4 space-y-3">
             {/* User Info Section */}
             <div className="pb-3 mb-3 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-primary-600 dark:text-primary-400">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-md">
+                  <span className="text-white text-lg font-medium">
                     {user?.name?.charAt(0)?.toUpperCase() ||
                       user?.email?.charAt(0)?.toUpperCase() ||
                       "U"}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                  <div className="text-base font-medium text-gray-900 dark:text-white truncate">
                     {user?.name || user?.email}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                  <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">
                     {user?.role}
                   </div>
                 </div>
@@ -152,15 +172,15 @@ const Header = ({ title }) => {
             </div>
 
             {/* Navigation Links */}
-            <nav className="space-y-1">
+            <nav className="space-y-2">
               {quickLinks.map((link, index) => (
                 <Link
                   key={index}
                   to={link.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                  className="flex items-center px-4 py-3 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200"
                 >
-                  <span className="mr-3 text-base">{link.icon}</span>
+                  <span className="mr-3 text-lg">{link.icon}</span>
                   {link.label}
                 </Link>
               ))}
@@ -170,26 +190,18 @@ const Header = ({ title }) => {
             <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
               <Button
                 variant="outline"
-                size="sm"
+                size="lg"
                 onClick={() => {
                   logout();
                   setMobileMenuOpen(false);
                 }}
-                className="w-full bg-transparent"
+                className="w-full bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800"
+                icon={
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                }
               >
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
                 Logout
               </Button>
             </div>
@@ -200,12 +212,14 @@ const Header = ({ title }) => {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 z-20 bg-gray-600 bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-20 bg-gray-600 dark:bg-gray-800 lg:hidden animate-fade-in"
           onClick={() => setMobileMenuOpen(false)}
         ></div>
       )}
     </header>
   );
-};
+});
+
+Header.displayName = 'Header';
 
 export default Header;

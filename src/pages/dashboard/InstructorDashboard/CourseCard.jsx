@@ -21,7 +21,7 @@ const CourseCard = ({
   );
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 lg:p-6 overflow-hidden">
       <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
         {course.title}
       </h3>
@@ -44,21 +44,21 @@ const CourseCard = ({
           {courseEnrollments.length} pending
         </span>
       </div>
-      <div className="flex flex-col sm:flex-row gap-2">
+      <div className="flex flex-col gap-2 min-w-0">
         <Button
           size="sm"
           variant="secondary"
           onClick={() => onManage(course)}
-          className="flex-1 text-xs sm:text-sm"
+          className="w-full text-xs sm:text-sm lg:text-base truncate"
         >
           Manage
         </Button>
-        <div className="flex gap-2">
-          <Link to={routes.editCourse(courseId)} className="flex-1">
+        <div className="grid grid-cols-2 gap-2 min-w-0">
+          <Link to={routes.editCourse(courseId)} className="min-w-0">
             <Button
               size="sm"
               variant="outline"
-              className="w-full text-xs sm:text-sm bg-transparent"
+              className="w-full text-xs sm:text-sm lg:text-base bg-transparent truncate"
             >
               Edit
             </Button>
@@ -67,7 +67,7 @@ const CourseCard = ({
             size="sm"
             variant="danger"
             onClick={() => onDelete(course)}
-            className="text-xs sm:text-sm"
+            className="w-full text-xs sm:text-sm lg:text-base truncate"
           >
             Delete
           </Button>

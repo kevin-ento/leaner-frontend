@@ -18,9 +18,9 @@ class AuthService {
     return (await apiClient.post(`/auth${routes.verifyOtp}`, data)).data;
   }
 
-  async forgotPassword(email) {
+  async forgotPassword(data) {
     return (
-      await apiClient.post(`/auth${routes.forgetPassword}`, { email })
+      await apiClient.post(`/auth${routes.forgetPassword}`, data)
     ).data;
   }
 

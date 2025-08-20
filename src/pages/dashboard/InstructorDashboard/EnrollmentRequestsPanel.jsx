@@ -6,6 +6,7 @@ const EnrollmentRequestsPanel = ({
   enrollmentRequests,
   onApproveEnrollment,
   onRejectEnrollment,
+  enrollmentLoading = {},
 }) => {
   return (
     <Panel title="Enrollment Requests" count={enrollmentRequests.length}>
@@ -17,6 +18,8 @@ const EnrollmentRequestsPanel = ({
             const enrollmentId = enrollment._id || enrollment.id;
             const studentName = enrollment.studentId?.name || "Unknown Student";
             const studentEmail = enrollment.studentId?.email || "No email";
+            const isLoading = enrollmentLoading[enrollmentId];
+            
             return (
               <div
                 key={enrollmentId}
@@ -39,6 +42,8 @@ const EnrollmentRequestsPanel = ({
                       size="sm"
                       onClick={() => onApproveEnrollment(enrollmentId)}
                       className="flex-1 text-xs"
+                      loading={isLoading}
+                      disabled={isLoading}
                     >
                       Approve
                     </Button>
@@ -47,6 +52,8 @@ const EnrollmentRequestsPanel = ({
                       variant="danger"
                       onClick={() => onRejectEnrollment(enrollmentId)}
                       className="flex-1 text-xs"
+                      loading={isLoading}
+                      disabled={isLoading}
                     >
                       Reject
                     </Button>

@@ -3,9 +3,6 @@ import { getRoleDisplayName } from "../../../utils/getRoleDisplayName";
 
 const UserCard = ({
   users,
-  editingUser,
-  setEditingUser,
-  handleUpdateUserRole,
   handleDeleteClick,
 }) => {
   const getRoleBadgeColor = (role) => {
@@ -45,47 +42,16 @@ const UserCard = ({
             </div>
 
             <div className="mb-4">
-              {editingUser === userId ? (
-                <select
-                  defaultValue={user.role}
-                  onChange={(e) => handleUpdateUserRole(userId, e.target.value)}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="student">Student</option>
-                  <option value="instructor">Instructor</option>
-                  <option value="admin">Administrator</option>
-                </select>
-              ) : (
-                <span
-                  className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(
-                    user.role
-                  )}`}
-                >
-                  {getRoleDisplayName(user.role)}
-                </span>
-              )}
+              <span
+                className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getRoleBadgeColor(
+                  user.role
+                )}`}
+              >
+                {getRoleDisplayName(user.role)}
+              </span>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2">
-              {editingUser === userId ? (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setEditingUser(null)}
-                  className="flex-1 text-xs"
-                >
-                  Cancel
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setEditingUser(userId)}
-                  className="flex-1 text-xs bg-transparent"
-                >
-                  Edit Role
-                </Button>
-              )}
               <Button
                 size="sm"
                 variant="danger"

@@ -5,13 +5,49 @@ import { getEntityId } from "../../../utils/apiHelpers";
 import Panel from "../../../components/Panel";
 import EmptyState from "../../../components/EmptyState";
 
-const SessionsPanel = ({ courseId, sessions, onDeleteSession }) => {
+const SessionsPanel = ({ courseId, sessions, onDeleteSession, loading = false }) => {
+  if (loading) {
+    return (
+      <Panel
+        title="Sessions"
+        count={0}
+        actions={
+          <Link to={routes.addSessionWithCourse(courseId)}>
+            <Button size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
+              Add Session
+            </Button>
+          </Link>
+        }
+      >
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse">
+              <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-3 sm:p-4">
+                <div className="flex flex-col gap-3">
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded flex-1"></div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Panel>
+    );
+  }
+
   return (
     <Panel
       title="Sessions"
       count={sessions.length}
       actions={
-        <Link to={`/add-session?courseId=${courseId}`}>
+        <Link to={routes.addSessionWithCourse(courseId)}>
           <Button size="sm" className="w-full sm:w-auto text-xs sm:text-sm">
             Add Session
           </Button>
@@ -23,7 +59,7 @@ const SessionsPanel = ({ courseId, sessions, onDeleteSession }) => {
           icon="🎥"
           subtitle="No sessions created yet."
           action={
-            <Link to={`/add-session?courseId=${courseId}`}>
+            <Link to={routes.addSessionWithCourse(courseId)}>
               <Button size="sm" className="text-xs sm:text-sm">
                 Create First Session
               </Button>
@@ -68,7 +104,7 @@ const SessionsPanel = ({ courseId, sessions, onDeleteSession }) => {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Link to={routes.editSession(sessionId)} className="flex-1">
+                    <Link to={routes.editSessionWithCourse(sessionId, courseId)} className="flex-1">
                       <Button
                         size="sm"
                         variant="outline"

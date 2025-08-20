@@ -1,7 +1,7 @@
 import Modal from "../../../components/Modal";
 import Button from "../../../components/Button";
 
-const DeleteCourseModal = ({ isOpen, onClose, courseToDelete, onConfirm }) => {
+const DeleteCourseModal = ({ isOpen, onClose, courseToDelete, onConfirm, loading = false }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Delete Course">
       <div className="mb-4">
@@ -11,10 +11,21 @@ const DeleteCourseModal = ({ isOpen, onClose, courseToDelete, onConfirm }) => {
         </p>
       </div>
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-        <Button variant="danger" onClick={onConfirm} className="flex-1">
+        <Button 
+          variant="danger" 
+          onClick={onConfirm} 
+          className="flex-1"
+          loading={loading}
+          disabled={loading}
+        >
           Delete Course
         </Button>
-        <Button variant="secondary" onClick={onClose} className="flex-1">
+        <Button 
+          variant="secondary" 
+          onClick={onClose} 
+          className="flex-1"
+          disabled={loading}
+        >
           Cancel
         </Button>
       </div>

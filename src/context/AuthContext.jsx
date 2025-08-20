@@ -1,95 +1,107 @@
-"use client"
+"use client";
 
-import { createContext, useState, useEffect } from "react"
-import { authService } from "../services/authService"
+import { createContext, useState, useEffect } from "react";
+import { authService } from "../services/authService";
 
-const AuthContext = createContext()
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [token, setToken] = useState(null)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const savedToken = localStorage.getItem("token")
+        const savedToken = localStorage.getItem("token");
         if (savedToken) {
-          setToken(savedToken)
+          setToken(savedToken);
 
           // Try to get user data with the saved token
-          const response = await authService.getMe()
+          const response = await authService.getMe();
 
-          let userData = response?.data?.user || response?.data
-          setUser(userData)
+          let userData = response?.data?.user || response?.data;
+          setUser(userData);
         }
       } catch (error) {
-        console.error("Auth initialization error:", error)
+        console.error("Auth initialization error:", error);
         // Only remove token if it's actually invalid (401/403)
         if (error.response?.status === 401 || error.response?.status === 403) {
-          localStorage.removeItem("token")
-          setToken(null)
-          setUser(null)
+          localStorage.removeItem("token");
+          setToken(null);
+          setUser(null);
         }
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    initAuth()
-  }, [])
+    initAuth();
+  }, []);
 
   const login = async (credentials) => {
     try {
-      const response = await authService.login(credentials)
+      if (credentials.token && credentials.user) {
+        localStorage.setItem("token", credentials.token);
+        setToken(credentials.token);
+        setUser(credentials.user);
+        return { success: true };
+      }
 
-      const token = response?.data?.token
-      const userData = response?.data?.user || response?.data
+      const response = await authService.login(credentials);
 
+      const token = response?.data?.token;
+      const userData = response?.data?.user || response?.data;
 
       if (!token) {
-        throw new Error("No authentication token received")
+        throw new Error("No authentication token received");
       }
 
-      localStorage.setItem("token", token)
-      setToken(token)
-      setUser(userData)
+      localStorage.setItem("token", token);
+      setToken(token);
+      setUser(userData);
 
-      return { success: true }
+      return { success: true };
     } catch (error) {
-      console.error("Login error:", error)
+      console.error("Login error:", error);
       return {
         success: false,
-        error: error.response?.data?.message || error.message || "Login failed. Please check your credentials.",
-      }
+        error:
+          error.response?.data?.message ||
+          error.message ||
+          "Login failed. Please check your credentials.",
+      };
     }
-  }
+  };
 
   const register = async (userData) => {
     try {
-      const response = await authService.register(userData)
-      return { success: true, data: response }
+      const response = await authService.register(userData);
+      return { success: true, data: response };
     } catch (error) {
-      console.error("Registration error:", error)
+      console.error("Registration error:", error);
       return {
         success: false,
-        error: error.response?.data?.message || error.message || "Registration failed. Please try again.",
-      }
+        error:
+          error.response?.data?.message ||
+          error.message ||
+          "Registration failed. Please try again.",
+      };
     }
-  }
+  };
 
   const updateUser = (updatedUserData) => {
     setUser((prevUser) => ({
       ...prevUser,
       ...updatedUserData,
-    }))
-  }
+    }));
+  };
 
   const logout = () => {
-    localStorage.removeItem("token")
-    setToken(null)
-    setUser(null)
-  }
+    localStorage.removeItem("token");
+    setToken(null);
+    setUser(null);
+  };
 
   const value = {
     user,
@@ -103,9 +115,9 @@ export const AuthProvider = ({ children }) => {
     isStudent: user?.role === "student",
     isInstructor: user?.role === "instructor",
     isAdmin: user?.role === "admin",
-  }
+  };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
 
-export default AuthContext
+export default AuthContext;

@@ -84,7 +84,63 @@ const CourseDetailsPage = () => {
     }
   };
 
-  if (loading) return <LoadingScreen />;
+  const getSessionCount = (courseId) =>
+    sessions.filter((session) => getEntityId(session.courseId) === String(courseId))
+      .length;
+
+  // Skeleton loading component
+  const CourseDetailsSkeleton = () => (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Header title="Course Details" />
+      <div className="max-w-5xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        {/* Back Button Skeleton */}
+        <div className="mb-6">
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-32 animate-pulse"></div>
+        </div>
+
+        {/* Course Header Skeleton */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8 mb-6 animate-pulse">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-6">
+            <div className="flex-1 space-y-4">
+              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+              <div className="flex flex-wrap gap-4">
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-28"></div>
+              </div>
+            </div>
+            <div className="md:w-1/3 flex-shrink-0">
+              <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+            </div>
+          </div>
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 space-y-3">
+            <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/6"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sessions Skeleton */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-4"></div>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 space-y-3">
+                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (loading) return <CourseDetailsSkeleton />;
 
   if (!course) {
     return (
@@ -230,7 +286,7 @@ const CourseDetailsPage = () => {
 
         {/* CTA */}
         {enrollmentStatus !== "approved" && (
-          <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-6 mt-6 text-center">
+          <div className="bg-primary-50 dark:bg-primary-900 border border-primary-200 dark:border-primary-800 rounded-lg p-6 mt-6 text-center">
             <h3 className="text-lg font-medium text-primary-900 dark:text-primary-100 mb-2">
               Ready to start learning?
             </h3>

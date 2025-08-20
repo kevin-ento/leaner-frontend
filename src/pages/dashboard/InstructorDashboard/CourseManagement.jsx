@@ -13,6 +13,9 @@ const CourseManagement = ({
   onApproveEnrollment,
   onRejectEnrollment,
   onDeleteSession,
+  enrollmentLoading = {},
+  enrolledStudentsLoading = false,
+  sessionsLoading = false,
 }) => {
   const courseId = getEntityId(selectedCourse);
 
@@ -49,14 +52,19 @@ const CourseManagement = ({
           courseId={courseId}
           sessions={courseSessions}
           onDeleteSession={onDeleteSession}
+          loading={sessionsLoading}
         />
 
-        <EnrolledStudentsPanel enrolledStudents={enrolledStudents} />
+        <EnrolledStudentsPanel 
+          enrolledStudents={enrolledStudents} 
+          loading={enrolledStudentsLoading}
+        />
 
         <EnrollmentRequestsPanel
           enrollmentRequests={courseEnrollments}
           onApproveEnrollment={onApproveEnrollment}
           onRejectEnrollment={onRejectEnrollment}
+          enrollmentLoading={enrollmentLoading}
         />
       </div>
     </div>

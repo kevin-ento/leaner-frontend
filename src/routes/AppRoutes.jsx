@@ -175,7 +175,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path={routes.editSession()}
+        path={routes.editSessionWithCourse()}
         element={
           <ProtectedRoute requiredRole="instructor">
             <SessionFormPage />
@@ -184,7 +184,7 @@ const AppRoutes = () => {
       />
 
       <Route
-        path={routes.editSessionWithCourse()}
+        path={routes.editSession()}
         element={
           <ProtectedRoute requiredRole="instructor">
             <SessionFormPage />

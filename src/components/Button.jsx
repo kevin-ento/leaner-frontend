@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 
 const Button = memo(({
   children,
@@ -9,6 +9,7 @@ const Button = memo(({
   className = "",
   icon,
   iconPosition = "left",
+  onClick,
   ...props
 }) => {
   const baseClasses =
@@ -41,10 +42,17 @@ const Button = memo(({
 
   const iconClasses = icon ? "gap-2" : ""
 
+  const handleClick = useCallback((e) => {
+    if (onClick && !disabled && !loading) {
+      onClick(e);
+    }
+  }, [onClick, disabled, loading]);
+
   return (
     <button
       className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${disabledClasses} ${iconClasses} ${className}`}
       disabled={disabled || loading}
+      onClick={handleClick}
       {...props}
     >
       {loading ? (

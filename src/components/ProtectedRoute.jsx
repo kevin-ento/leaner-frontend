@@ -1,11 +1,12 @@
 "use client";
 
+import { memo } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { routes } from "../constants/routes";
 import LoadingScreen from "./LoadingScreen";
 
-const ProtectedRoute = ({ children, requiredRole }) => {
+const ProtectedRoute = memo(({ children, requiredRole }) => {
   const { isAuthenticated, user, loading } = useAuth();
 
   if (loading) {
@@ -28,6 +29,8 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }
 
   return children;
-};
+});
+
+ProtectedRoute.displayName = 'ProtectedRoute';
 
 export default ProtectedRoute;

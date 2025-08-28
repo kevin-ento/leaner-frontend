@@ -1,13 +1,14 @@
 export function getEntityId(entity) {
   if (!entity) return "";
-  const id = entity._id ?? entity.id ?? entity;
-  return String(id);
+  // Since you control the backend, you know it always returns _id
+  return String(entity._id);
 }
 
 export function extractArray(response) {
   if (!response) return [];
 
-  const resData = response.data ?? response;
+  // Your backend consistently returns { data: [...] }
+  const resData = response.data;
   if (Array.isArray(resData)) return resData;
   if (resData && Array.isArray(resData.list)) return resData.list;
   return [];
@@ -15,7 +16,9 @@ export function extractArray(response) {
 
 export function extractItem(response, preferredKeys = []) {
   if (!response) return null;
-  const data = response.data ?? response;
+  
+  // Your backend consistently returns { data: { item: {...} } }
+  const data = response.data;
 
   const keyCandidates = [
     ...preferredKeys,
@@ -32,5 +35,5 @@ export function extractItem(response, preferredKeys = []) {
     }
   }
 
-  return data ?? null;
+  return data || null;
 }

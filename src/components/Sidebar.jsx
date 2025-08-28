@@ -1,8 +1,9 @@
 "use client"
 
-import { NavLink } from "react-router-dom"
+import { memo } from "react";
+import { NavLink } from "react-router-dom";
 
-const Sidebar = ({ items, className = "" }) => {
+const Sidebar = memo(({ items, className = "" }) => {
   return (
     <div className={`bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700 ${className}`}>
       <nav className="mt-4">
@@ -40,6 +41,8 @@ const Sidebar = ({ items, className = "" }) => {
       </nav>
     </div>
   )
-}
+});
 
-export default Sidebar
+Sidebar.displayName = 'Sidebar';
+
+export default Sidebar;

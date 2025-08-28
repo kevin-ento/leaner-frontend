@@ -1,15 +1,21 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useCallback } from "react"
 
 const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape") {
-        onClose()
-      }
+  const handleEscape = useCallback((e) => {
+    if (e.key === "Escape") {
+      onClose()
     }
+  }, [onClose])
 
+  const handleBackdropClick = useCallback((e) => {
+    if (e.target === e.currentTarget) {
+      onClose()
+    }
+  }, [onClose])
+
+  useEffect(() => {
     if (isOpen) {
       document.addEventListener("keydown", handleEscape)
       document.body.style.overflow = "hidden"
@@ -19,7 +25,7 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
       document.removeEventListener("keydown", handleEscape)
       document.body.style.overflow = "unset"
     }
-  }, [isOpen, onClose])
+  }, [isOpen, handleEscape])
 
   if (!isOpen) return null
 
@@ -35,7 +41,7 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div
           className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
-          onClick={onClose}
+          onClick={handleBackdropClick}
         ></div>
 
         <div
@@ -45,7 +51,8 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
             <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">{title}</h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none p-1"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none p-1 transition-colors"
+              aria-label="Close modal"
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

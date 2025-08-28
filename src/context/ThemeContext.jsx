@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 
 const ThemeContext = createContext({
   theme: "dark",
@@ -10,7 +10,7 @@ const ThemeContext = createContext({
 });
 
 export const ThemeProvider = ({ children }) => {
-  const getPreferredTheme = () => {
+  const getPreferredTheme = useCallback(() => {
     try {
       const stored = localStorage.getItem("theme");
       if (stored === "dark" || stored === "light") return stored;
@@ -18,7 +18,7 @@ export const ThemeProvider = ({ children }) => {
     } catch {
       return "dark";
     }
-  };
+  }, []);
 
   // Initialize from storage immediately to avoid flash
   const [theme, setTheme] = useState(getPreferredTheme);
@@ -31,14 +31,18 @@ export const ThemeProvider = ({ children }) => {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  const toggleTheme = useCallback(() => {
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  }, []);
+
   const value = useMemo(
     () => ({
       theme,
       isDark: theme === "dark",
-      toggleTheme: () => setTheme((t) => (t === "dark" ? "light" : "dark")),
+      toggleTheme,
       setTheme,
     }),
-    [theme]
+    [theme, toggleTheme]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

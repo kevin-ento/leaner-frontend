@@ -1,6 +1,8 @@
 "use client";
 
-const EmptyState = ({ icon, title, subtitle, action }) => {
+import { memo } from "react";
+
+const EmptyState = memo(({ icon, title, subtitle, action }) => {
   return (
     <div className="text-center py-6 sm:py-8">
       <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -19,7 +21,9 @@ const EmptyState = ({ icon, title, subtitle, action }) => {
       {action}
     </div>
   );
-};
+});
+
+EmptyState.displayName = 'EmptyState';
 
 export default EmptyState;
 

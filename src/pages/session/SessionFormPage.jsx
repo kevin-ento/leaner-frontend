@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Header from "../../components/Header";
@@ -35,48 +35,44 @@ const SessionFormPage = () => {
   const isEditing = !!sessionId;
   const { user } = useAuth();
 
-  useEffect(() => {
-    const initializeForm = async () => {
-      try {
-        setInitialLoading(true);
-        await fetchCourses();
-        
-        if (isEditing) {
-          await fetchSession();
-        } else if (courseIdFromUrl) {
-          setFormData((prev) => ({ ...prev, courseId: courseIdFromUrl }));
-        }
-      } catch (error) {
-        console.error("Failed to initialize form:", error);
-      } finally {
-        setInitialLoading(false);
-      }
-    };
-    
-    initializeForm();
-  }, [sessionId, courseIdFromUrl]);
+  // Memoize expensive computations
+  const userId = useMemo(() => getEntityId(user), [user]);
+  const instructorCourses = useMemo(() => {
+    return courses.filter((course) => {
+      const courseInstructorId = getEntityId(course.instructorId);
+      return String(courseInstructorId) === String(userId);
+    });
+  }, [courses, userId]);
 
-  const fetchCourses = async () => {
+  const selectedCourse = useMemo(() => 
+    instructorCourses.find(c => getEntityId(c) === formData.courseId), 
+    [instructorCourses, formData.courseId]
+  );
+
+  const backButtonText = useMemo(() => 
+    selectedCourse ? `← Back to ${selectedCourse.title}` : "← Back to Dashboard", 
+    [selectedCourse]
+  );
+
+  const backButtonUrl = useMemo(() => 
+    selectedCourse ? routes.instructorWithCourse(formData.courseId) : routes.instructor, 
+    [selectedCourse, formData.courseId]
+  );
+
+  // Memoize fetch functions
+  const fetchCourses = useCallback(async () => {
     try {
       const response = await courseService.getAllCourses();
       const coursesData = extractArray(response);
-
-      // Filter courses for the current instructor
-      const userId = getEntityId(user);
-      const instructorCourses = coursesData.filter((course) => {
-        const courseInstructorId = getEntityId(course.instructorId);
-        return String(courseInstructorId) === String(userId);
-      });
-
-      setCourses(instructorCourses);
+      setCourses(coursesData);
     } catch (error) {
       console.error("Failed to fetch courses:", error);
       showToast("Failed to fetch courses", "error");
-      setCourses([]); // Set empty array as fallback
+      setCourses([]); 
     }
-  };
+  }, []);
 
-  const fetchSession = async () => {
+  const fetchSession = useCallback(async () => {
     try {
       const response = await sessionService.getSession(sessionId);
       const sessionData = extractItem(response, ["session"]);
@@ -97,9 +93,30 @@ const SessionFormPage = () => {
       showToast("Failed to fetch session details", "error");
       navigate(routes.instructor);
     }
-  };
+  }, [sessionId, navigate]);
 
-  const handleChange = (e) => {
+  useEffect(() => {
+    const initializeForm = async () => {
+      try {
+        setInitialLoading(true);
+        await fetchCourses();
+        
+        if (isEditing) {
+          await fetchSession();
+        } else if (courseIdFromUrl) {
+          setFormData((prev) => ({ ...prev, courseId: courseIdFromUrl }));
+        }
+      } catch (error) {
+        console.error("Failed to initialize form:", error);
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+    
+    initializeForm();
+  }, [sessionId, courseIdFromUrl, fetchCourses, fetchSession, isEditing]);
+
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -112,9 +129,9 @@ const SessionFormPage = () => {
         [name]: "",
       }));
     }
-  };
+  }, [errors]);
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors = {};
 
     if (!formData.title.trim()) {
@@ -141,18 +158,18 @@ const SessionFormPage = () => {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData]);
 
-  const isValidUrl = (string) => {
+  const isValidUrl = useCallback((string) => {
     try {
       new URL(string);
       return true;
     } catch (_) {
       return false;
     }
-  };
+  }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
     if (!validateForm()) return;
@@ -197,7 +214,11 @@ const SessionFormPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [formData, validateForm, isEditing, sessionId, navigate]);
+
+  const handleCancel = useCallback(() => {
+    navigate(backButtonUrl);
+  }, [navigate, backButtonUrl]);
 
   // Show loading screen while initializing form
   if (initialLoading) {
@@ -254,11 +275,6 @@ const SessionFormPage = () => {
     );
   }
 
-  // Get the course title for the back button
-  const selectedCourse = courses.find(c => getEntityId(c) === formData.courseId);
-  const backButtonText = selectedCourse ? `← Back to ${selectedCourse.title}` : "← Back to Dashboard";
-  const backButtonUrl = selectedCourse ? routes.instructorWithCourse(formData.courseId) : routes.instructor;
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header title={isEditing ? "Edit Session" : "Add Session"} />
@@ -291,21 +307,19 @@ const SessionFormPage = () => {
                   errors.courseId ? "border-red-500 focus:ring-red-500" : ""
                 }`}
                 disabled={isEditing || !!courseIdFromUrl}
+                aria-describedby={errors.courseId ? "courseId-error" : undefined}
               >
                 <option value="">Select a course</option>
-                {courses.map((course) => {
-                  const courseId = course._id || course.id;
-                  return (
-                    <option key={courseId} value={courseId}>
-                      {course.title}
-                    </option>
-                  );
-                })}
+                {instructorCourses.map((course) => (
+                  <option key={course._id} value={course._id}>
+                    {course.title}
+                  </option>
+                ))}
               </select>
               {errors.courseId && (
-                <p className="mt-1 text-sm text-red-600">{errors.courseId}</p>
+                <p id="courseId-error" className="mt-1 text-sm text-red-600">{errors.courseId}</p>
               )}
-              {courses.length === 0 && (
+              {instructorCourses.length === 0 && (
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   No courses available. Please create a course first.
                 </p>
@@ -336,9 +350,10 @@ const SessionFormPage = () => {
                   errors.description ? "border-red-500 focus:ring-red-500" : ""
                 }`}
                 placeholder="Enter session description"
+                aria-describedby={errors.description ? "description-error" : undefined}
               />
               {errors.description && (
-                <p className="mt-1 text-sm text-red-600">
+                <p id="description-error" className="mt-1 text-sm text-red-600">
                   {errors.description}
                 </p>
               )}
@@ -369,7 +384,7 @@ const SessionFormPage = () => {
               <Button
                 type="submit"
                 loading={loading}
-                disabled={courses.length === 0}
+                disabled={instructorCourses.length === 0}
               >
                 {isEditing ? "Update Session" : "Add Session"}
               </Button>
@@ -377,7 +392,7 @@ const SessionFormPage = () => {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => navigate(backButtonUrl)}
+                onClick={handleCancel}
               >
                 Cancel
               </Button>

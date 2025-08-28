@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo } from "react";
+import { useState, memo, useCallback, useMemo } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Link, useLocation } from "react-router-dom";
 import Button from "./Button";
@@ -13,13 +13,12 @@ const Header = memo(({ title }) => {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const dashboardLink = getDashboardLink(user);
-  const quickLinks = getQuickLinks(user);
+  
+  // Memoize expensive computations
+  const dashboardLink = useMemo(() => getDashboardLink(user), [user]);
+  const quickLinks = useMemo(() => getQuickLinks(user), [user]);
 
-  // Determine the logo navigation link
-  // If we're on a course-specific page, go to main dashboard
-  // If we're on main dashboard, stay there
-  const getLogoLink = () => {
+  const getLogoLink = useCallback(() => {
     if (!user) return routes.home;
     
     // Check if we're on a course-specific route
@@ -35,9 +34,34 @@ const Header = memo(({ title }) => {
     
     // Default to role dashboard
     return dashboardLink;
-  };
+  }, [user, location.pathname, dashboardLink]);
 
-  const logoLink = getLogoLink();
+  const logoLink = useMemo(() => getLogoLink(), [getLogoLink]);
+
+  const handleMobileMenuToggle = useCallback(() => {
+    setMobileMenuOpen(prev => !prev);
+  }, []);
+
+  const handleMobileMenuClose = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    logout();
+    setMobileMenuOpen(false);
+  }, [logout]);
+
+  const userInitial = useMemo(() => 
+    user?.name?.charAt(0)?.toUpperCase() ||
+    user?.email?.charAt(0)?.toUpperCase() ||
+    "U", 
+    [user?.name, user?.email]
+  );
+
+  const userName = useMemo(() => 
+    user?.name || user?.email, 
+    [user?.name, user?.email]
+  );
 
   return (
     <header className="bg-white dark:bg-gray-900 backdrop-blur-md shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30">
@@ -90,14 +114,12 @@ const Header = memo(({ title }) => {
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-md">
                   <span className="text-white text-sm font-medium">
-                    {user?.name?.charAt(0)?.toUpperCase() ||
-                      user?.email?.charAt(0)?.toUpperCase() ||
-                      "U"}
+                    {userInitial}
                   </span>
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-32">
-                    {user?.name || user?.email}
+                    {userName}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                     {user?.role}
@@ -124,9 +146,10 @@ const Header = memo(({ title }) => {
           <div className="lg:hidden flex items-center gap-3">
             <ThemeToggle />
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={handleMobileMenuToggle}
               className="p-2 rounded-lg text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-colors duration-200"
-              aria-expanded="false"
+              aria-expanded={mobileMenuOpen}
+              aria-label="Toggle mobile menu"
             >
               <span className="sr-only">Open main menu</span>
               {mobileMenuOpen ? (
@@ -155,14 +178,12 @@ const Header = memo(({ title }) => {
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center shadow-md">
                   <span className="text-white text-lg font-medium">
-                    {user?.name?.charAt(0)?.toUpperCase() ||
-                      user?.email?.charAt(0)?.toUpperCase() ||
-                      "U"}
+                    {userInitial}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-base font-medium text-gray-900 dark:text-white truncate">
-                    {user?.name || user?.email}
+                    {userName}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">
                     {user?.role}
@@ -177,7 +198,7 @@ const Header = memo(({ title }) => {
                 <Link
                   key={index}
                   to={link.path}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={handleMobileMenuClose}
                   className="flex items-center px-4 py-3 text-base font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200"
                 >
                   <span className="mr-3 text-lg">{link.icon}</span>
@@ -191,10 +212,7 @@ const Header = memo(({ title }) => {
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => {
-                  logout();
-                  setMobileMenuOpen(false);
-                }}
+                onClick={handleLogout}
                 className="w-full bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800"
                 icon={
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -213,7 +231,7 @@ const Header = memo(({ title }) => {
       {mobileMenuOpen && (
         <div
           className="fixed inset-0 z-20 bg-gray-600 dark:bg-gray-800 lg:hidden animate-fade-in"
-          onClick={() => setMobileMenuOpen(false)}
+          onClick={handleMobileMenuClose}
         ></div>
       )}
     </header>

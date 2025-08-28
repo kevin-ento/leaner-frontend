@@ -1,8 +1,9 @@
 "use client";
 
+import { memo } from "react";
 import { useTheme } from "../context/ThemeContext";
 
-const ThemeToggle = ({ className = "" }) => {
+const ThemeToggle = memo(({ className = "" }) => {
   const { isDark, toggleTheme } = useTheme();
   return (
     <button
@@ -13,7 +14,9 @@ const ThemeToggle = ({ className = "" }) => {
       {isDark ? "🌙 Dark" : "☀️ Light"}
     </button>
   );
-};
+});
+
+ThemeToggle.displayName = 'ThemeToggle';
 
 export default ThemeToggle;
 

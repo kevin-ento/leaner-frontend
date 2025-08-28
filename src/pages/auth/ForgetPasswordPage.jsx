@@ -8,7 +8,6 @@ import Input from "../../components/Input";
 import { authService } from "../../services/authService";
 import { showToast } from "../../components/Toast";
 import { routes } from "../../constants/routes";
-import LoadingScreen from "../../components/LoadingScreen";
 
 const ForgetPasswordPage = () => {
   const [email, setEmail] = useState("");

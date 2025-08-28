@@ -1,40 +1,49 @@
 "use client";
 
+import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { getDashboardLink } from "../utils/getDashboardRoute";
 import LoadingScreen from "../components/LoadingScreen";
 
-// Auth Pages
-import LoginPage from "../pages/auth/LoginPage";
-import RegisterPage from "../pages/auth/RegisterPage";
-import VerifyOtpPage from "../pages/auth/VerifyOtpPage";
-import ForgetPasswordPage from "../pages/auth/ForgetPasswordPage";
-import ResetPasswordOtpPage from "../pages/auth/ResetPasswordOtpPage";
-import ResetPasswordPage from "../pages/auth/ResetPasswordPage";
-import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
+// Lazy load components for better performance
+const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("../pages/auth/RegisterPage"));
+const VerifyOtpPage = lazy(() => import("../pages/auth/VerifyOtpPage"));
+const ForgetPasswordPage = lazy(() => import("../pages/auth/ForgetPasswordPage"));
+const ResetPasswordOtpPage = lazy(() => import("../pages/auth/ResetPasswordOtpPage"));
+const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
+const ChangePasswordPage = lazy(() => import("../pages/auth/ChangePasswordPage"));
 
 // Dashboard Pages
-import StudentDashboard from "../pages/dashboard/StudentDashboard/index";
-import InstructorDashboard from "../pages/dashboard/InstructorDashboard/index";
-import AdminDashboard from "../pages/dashboard/AdminDashboard/index";
+const StudentDashboard = lazy(() => import("../pages/dashboard/StudentDashboard/index"));
+const InstructorDashboard = lazy(() => import("../pages/dashboard/InstructorDashboard/index"));
+const AdminDashboard = lazy(() => import("../pages/dashboard/AdminDashboard/index"));
 
 // Course Pages
-import MyCoursesPage from "../pages/course/MyCoursesPage";
-import AllCoursesPage from "../pages/course/AllCoursesPage";
-import CourseFormPage from "../pages/course/CourseFormPage";
-import CourseDetailsPage from "../pages/course/CourseDetailsPage";
+const MyCoursesPage = lazy(() => import("../pages/course/MyCoursesPage"));
+const AllCoursesPage = lazy(() => import("../pages/course/AllCoursesPage"));
+const CourseFormPage = lazy(() => import("../pages/course/CourseFormPage"));
+const CourseDetailsPage = lazy(() => import("../pages/course/CourseDetailsPage"));
 
 // Session Pages
-import SessionFormPage from "../pages/session/SessionFormPage";
+const SessionFormPage = lazy(() => import("../pages/session/SessionFormPage"));
 
 // Profile Page
-import ProfilePage from "../pages/profile/index";
+const ProfilePage = lazy(() => import("../pages/profile/index"));
 
 // Not Found
-import NotFoundPage from "../pages/NotFoundPage";
+const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
+
 import { routes } from "../constants/routes";
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <LoadingScreen message="Loading page..." />
+  </div>
+);
 
 const AppRoutes = () => {
   const { isAuthenticated, user, loading } = useAuth();
@@ -52,7 +61,9 @@ const AppRoutes = () => {
           isAuthenticated ? (
             <Navigate to={dashboardRoute} replace />
           ) : (
-            <LoginPage />
+            <Suspense fallback={<PageLoader />}>
+              <LoginPage />
+            </Suspense>
           )
         }
       />
@@ -62,24 +73,53 @@ const AppRoutes = () => {
           isAuthenticated ? (
             <Navigate to={dashboardRoute} replace />
           ) : (
-            <RegisterPage />
+            <Suspense fallback={<PageLoader />}>
+              <RegisterPage />
+            </Suspense>
           )
         }
       />
-      <Route path={routes.verifyOtp} element={<VerifyOtpPage />} />
-      <Route path={routes.forgetPassword} element={<ForgetPasswordPage />} />
+      <Route 
+        path={routes.verifyOtp} 
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <VerifyOtpPage />
+          </Suspense>
+        } 
+      />
+      <Route 
+        path={routes.forgetPassword} 
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <ForgetPasswordPage />
+          </Suspense>
+        } 
+      />
       <Route
         path={routes.resetPasswordOtp}
-        element={<ResetPasswordOtpPage />}
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <ResetPasswordOtpPage />
+          </Suspense>
+        }
       />
-      <Route path={routes.resetPassword} element={<ResetPasswordPage />} />
+      <Route 
+        path={routes.resetPassword} 
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <ResetPasswordPage />
+          </Suspense>
+        } 
+      />
 
       {/* Protected Routes with proper role checking */}
       <Route
         path={routes.student}
         element={
           <ProtectedRoute requiredRole="student">
-            <StudentDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <StudentDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -88,7 +128,9 @@ const AppRoutes = () => {
         path={routes.instructor}
         element={
           <ProtectedRoute requiredRole="instructor">
-            <InstructorDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <InstructorDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -97,7 +139,9 @@ const AppRoutes = () => {
         path={routes.instructorWithCourse()}
         element={
           <ProtectedRoute requiredRole="instructor">
-            <InstructorDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <InstructorDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -106,7 +150,9 @@ const AppRoutes = () => {
         path={routes.admin}
         element={
           <ProtectedRoute requiredRole="admin">
-            <AdminDashboard />
+            <Suspense fallback={<PageLoader />}>
+              <AdminDashboard />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -115,7 +161,9 @@ const AppRoutes = () => {
         path={routes.myCourses}
         element={
           <ProtectedRoute>
-            <MyCoursesPage />
+            <Suspense fallback={<PageLoader />}>
+              <MyCoursesPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -124,7 +172,9 @@ const AppRoutes = () => {
         path={routes.allCourses}
         element={
           <ProtectedRoute>
-            <AllCoursesPage />
+            <Suspense fallback={<PageLoader />}>
+              <AllCoursesPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -133,7 +183,9 @@ const AppRoutes = () => {
         path={routes.courseDetails()}
         element={
           <ProtectedRoute>
-            <CourseDetailsPage />
+            <Suspense fallback={<PageLoader />}>
+              <CourseDetailsPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -142,7 +194,9 @@ const AppRoutes = () => {
         path={routes.createCourse}
         element={
           <ProtectedRoute requiredRole="instructor">
-            <CourseFormPage />
+            <Suspense fallback={<PageLoader />}>
+              <CourseFormPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -151,7 +205,9 @@ const AppRoutes = () => {
         path={routes.editCourse()}
         element={
           <ProtectedRoute requiredRole="instructor">
-            <CourseFormPage />
+            <Suspense fallback={<PageLoader />}>
+              <CourseFormPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -160,7 +216,9 @@ const AppRoutes = () => {
         path={routes.addSession}
         element={
           <ProtectedRoute requiredRole="instructor">
-            <SessionFormPage />
+            <Suspense fallback={<PageLoader />}>
+              <SessionFormPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -169,7 +227,9 @@ const AppRoutes = () => {
         path={routes.addSessionWithCourse()}
         element={
           <ProtectedRoute requiredRole="instructor">
-            <SessionFormPage />
+            <Suspense fallback={<PageLoader />}>
+              <SessionFormPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -178,7 +238,9 @@ const AppRoutes = () => {
         path={routes.editSessionWithCourse()}
         element={
           <ProtectedRoute requiredRole="instructor">
-            <SessionFormPage />
+            <Suspense fallback={<PageLoader />}>
+              <SessionFormPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -187,7 +249,9 @@ const AppRoutes = () => {
         path={routes.editSession()}
         element={
           <ProtectedRoute requiredRole="instructor">
-            <SessionFormPage />
+            <Suspense fallback={<PageLoader />}>
+              <SessionFormPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -196,7 +260,9 @@ const AppRoutes = () => {
         path={routes.changePassword()}
         element={
           <ProtectedRoute>
-            <ChangePasswordPage />
+            <Suspense fallback={<PageLoader />}>
+              <ChangePasswordPage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -205,7 +271,9 @@ const AppRoutes = () => {
         path={routes.profile}
         element={
           <ProtectedRoute>
-            <ProfilePage />
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -222,7 +290,14 @@ const AppRoutes = () => {
       />
 
       {/* 404 */}
-      <Route path={routes.notFound} element={<NotFoundPage />} />
+      <Route 
+        path={routes.notFound} 
+        element={
+          <Suspense fallback={<PageLoader />}>
+            <NotFoundPage />
+          </Suspense>
+        } 
+      />
     </Routes>
   );
 };

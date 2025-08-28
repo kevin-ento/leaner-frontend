@@ -10,7 +10,6 @@ import { sessionService } from "../../services/sessionService";
 import { useAuth } from "../../hooks/useAuth";
 import { showToast } from "../../components/Toast";
 import { getDashboardLink } from "../../utils/getDashboardRoute";
-import LoadingScreen from "../../components/LoadingScreen";
 import { extractArray, extractItem, getEntityId } from "../../utils/apiHelpers";
 import { routes } from "../../constants/routes";
 

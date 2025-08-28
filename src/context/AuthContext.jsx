@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback, useMemo } from "react";
 import { authService } from "../services/authService";
 
 const AuthContext = createContext();
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
-  const login = async (credentials) => {
+  const login = useCallback(async (credentials) => {
     try {
       if (credentials.token && credentials.user) {
         localStorage.setItem("token", credentials.token);
@@ -72,9 +72,9 @@ export const AuthProvider = ({ children }) => {
           "Login failed. Please check your credentials.",
       };
     }
-  };
+  }, []);
 
-  const register = async (userData) => {
+  const register = useCallback(async (userData) => {
     try {
       const response = await authService.register(userData);
       return { success: true, data: response };
@@ -88,22 +88,23 @@ export const AuthProvider = ({ children }) => {
           "Registration failed. Please try again.",
       };
     }
-  };
+  }, []);
 
-  const updateUser = (updatedUserData) => {
+  const updateUser = useCallback((updatedUserData) => {
     setUser((prevUser) => ({
       ...prevUser,
       ...updatedUserData,
     }));
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
-  };
+  }, []);
 
-  const value = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
     user,
     token,
     loading,
@@ -115,7 +116,7 @@ export const AuthProvider = ({ children }) => {
     isStudent: user?.role === "student",
     isInstructor: user?.role === "instructor",
     isAdmin: user?.role === "admin",
-  };
+  }), [user, token, loading, login, register, logout, updateUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

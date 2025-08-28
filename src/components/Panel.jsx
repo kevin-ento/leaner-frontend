@@ -1,6 +1,8 @@
 "use client";
 
-const Panel = ({ title, count, actions, children }) => {
+import { memo } from "react";
+
+const Panel = memo(({ title, count, actions, children }) => {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
       {(title || actions) && (
@@ -19,7 +21,9 @@ const Panel = ({ title, count, actions, children }) => {
       {children}
     </div>
   );
-};
+});
+
+Panel.displayName = 'Panel';
 
 export default Panel;
 

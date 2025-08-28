@@ -6,8 +6,8 @@ const resolvedBaseUrl = import.meta.env.VITE_API_URL;
 
 const apiClient = axios.create({
   baseURL: resolvedBaseUrl,
-  // Increase timeout to better handle cold starts on free-tier hosting providers
-  timeout: 60000,
+  // Reduced timeout for better user experience
+  timeout: 15000, // 15 seconds instead of 60
   headers: {
     "Content-Type": "application/json",
   },
